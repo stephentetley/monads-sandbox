@@ -1,4 +1,4 @@
-use Applicative.{point, count};
+use Applicative.{point, count, filterA};
 use Alternative.{optionalWithDefault};
 use MonadLib/Transformers.{Id};
 use MonadLib/Transformers.Id.{Id};  /// temp
@@ -18,4 +18,6 @@ def main(_args: Array[String]): Int32 & Impure =
     Console.printLine("xs1: ${xs1}");
     let xs2: Option[List[String]] = count(10, None: Option[String]);
     Console.printLine("xs2: ${xs2}");
+    let xs3: Option[List[Int32]] = filterA(x -> if (x < 5) Some(true) else Some(false), 1 :: 2 :: 3 :: 4 :: 5 :: Nil);
+    Console.printLine("xs3: ${xs3}");
     ans

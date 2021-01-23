@@ -51,6 +51,9 @@ namespace Alternative {
     pub def <|>[a, m :# Type -> Type : Alternative](x: m[a] , y: m[a]): m[a] = 
         alt(x, y)
     
+    pub def guard[m :# Type -> Type: Alternative](x: Bool): m[Unit] = 
+        if (x) point(()) else zero()
+
     ///  One or none.
     pub def optional[a, m :# Type -> Type : Alternative](v: m[a]): m[Option[a]] = 
         alt(Functor.map(x1 -> Some(x1), v), point(None))

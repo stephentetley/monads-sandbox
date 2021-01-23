@@ -132,6 +132,48 @@ namespace Applicative {
         case Nil => k(point(Nil))
     }
 
+    pub def mapX[a, b, m :# Type -> Type : Applicative](f: a -> m[b], xs: List[a]): m[Unit] = 
+        mapXHelper(f, xs, point(()))
+
+    def mapXHelper[a, b, m :# Type -> Type : Applicative](f: a -> m[b], xs: List[a], ac: m[Unit]): m[Unit] = match xs { 
+        case Nil => ac
+        case x :: rs => mapXHelper(f, rs, ignore(f(x)))
+    }
+
+    pub def forA[a, b, m :# Type -> Type : Applicative](xs: List[a], f: a -> m[b]): m[List[b]] =
+        mapA(f, xs)
+
+    pub def forX[a, b, m :# Type -> Type : Applicative](xs: List[a], f: a -> m[b]): m[Unit] = 
+        mapX(f, xs)
+
+
+    pub def sequenceA[a, m :# Type -> Type : Applicative](xs: List[m[a]]): m[List[a]] = 
+        sequenceAHelper(xs, mks -> mks)
+
+    def sequenceAHelper[a, m :# Type -> Type : Applicative](xs: List[m[a]], k: m[List[a]] -> m[List[a]]): m[List[a]] = match xs {
+        case mx :: rs => sequenceAHelper(rs, mks -> k(consA(mx, mks)))
+        case Nil => k(point(Nil))
+    }
+
+    pub def sequenceX[a, m :# Type -> Type : Applicative](xs: List[m[a]]): m[Unit] = 
+        sequenceXHelper(xs, point(()))
+
+    def sequenceXHelper[a, m :# Type -> Type : Applicative](xs: List[m[a]], ac: m[Unit]): m[Unit] = match xs {
+        case mx :: rs => sequenceXHelper(rs, ignore(mx))
+        case Nil => ac
+    }
+
+    pub def filterA[a, m :# Type -> Type : Applicative](f: a -> m[Bool], xs: List[a]): m[List[a]] = 
+        filterAHelper(f, xs, mks -> mks)
+
+    def filterAHelper[a, m :# Type -> Type : Applicative](f: a -> m[Bool], xs: List[a], k: m[List[a]] -> m[List[a]]): m[List[a]] = match xs {
+        case x :: rs => filterAHelper(f, rs, mks -> k(whenConsA(f, x, mks)))
+        case Nil => k(point(Nil))
+    }
+    
+    def whenConsA[a, m :# Type -> Type : Applicative](f: a -> m[Bool], x: a, fs: m[List[a]]): m[List[a]] =
+        (((test, xs) -> if (test) (x :: xs) else xs) <&> f(x)) <*> fs
+
 
     pub def liftA2[t1, t2, t3, ef, m :# Type -> Type : Applicative](f: (t1, t2) -> t3 & ef, a1: m[t1], a2: m[t2]): m[t3] & ef = 
         (((x1, x2) -> f(x1, x2)) <&> a1) <*> a2
