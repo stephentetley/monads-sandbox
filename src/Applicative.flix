@@ -49,10 +49,12 @@ namespace Applicative {
     pub def <&>[a, b, ef, m :# Type -> Type : Functor](f: a -> b & ef, mx: m[a]): m[b] & ef =
         Functor.map(f, mx)
 
-    // Haskell's ap <*>
+    // Haskell's <*> (i.e `ap`)
     pub def <*>[a, b, ef, m :# Type -> Type : Applicative](f: m[a -> b & ef], mx: m[a]): m[b] & ef =
         Applicative.ap(f, mx)
 
+    pub def <**>[a, b, ef, m :# Type -> Type : Applicative](mx: m[a], f: m[a -> b & ef]): m[b] & ef =
+        Applicative.ap(f, mx)
 
     pub def seqLeft[a, b, m :# Type -> Type : Applicative](mx: m[a], my: m[b]): m[a] = 
         (((x1, _) -> x1) <&> mx) <*> my
@@ -83,5 +85,17 @@ namespace Applicative {
 
     pub def liftA6[t1, t2, t3, t4, t5, t6, t7, ef, m :# Type -> Type : Applicative](f: (t1, t2, t3, t4, t5, t6) -> t7 & ef, a1: m[t1], a2: m[t2], a3: m[t3], a4: m[t4], a5: m[t5], a6: m[t6]): m[t7] & ef = 
         liftA5(f, a1, a2, a3, a4, a5) <*> a6
+
+    pub def liftA7[t1, t2, t3, t4, t5, t6, t7, t8, ef, m :# Type -> Type : Applicative](f: (t1, t2, t3, t4, t5, t6, t7) -> t8 & ef, a1: m[t1], a2: m[t2], a3: m[t3], a4: m[t4], a5: m[t5], a6: m[t6], a7: m[t7]): m[t8] & ef = 
+        liftA6(f, a1, a2, a3, a4, a5, a6) <*> a7
+
+    pub def liftA8[t1, t2, t3, t4, t5, t6, t7, t8, t9, ef, m :# Type -> Type : Applicative](f: (t1, t2, t3, t4, t5, t6, t7, t8) -> t9 & ef, a1: m[t1], a2: m[t2], a3: m[t3], a4: m[t4], a5: m[t5], a6: m[t6], a7: m[t7], a8: m[t8]): m[t9] & ef = 
+        liftA7(f, a1, a2, a3, a4, a5, a6, a7) <*> a8
+
+    pub def liftA9[t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, ef, m :# Type -> Type : Applicative](f: (t1, t2, t3, t4, t5, t6, t7, t8, t9) -> t10 & ef, a1: m[t1], a2: m[t2], a3: m[t3], a4: m[t4], a5: m[t5], a6: m[t6], a7: m[t7], a8: m[t8], a9: m[t9]): m[t10] & ef = 
+        liftA8(f, a1, a2, a3, a4, a5, a6, a7, a8) <*> a9
+
+    pub def liftA10[t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, ef, m :# Type -> Type : Applicative](f: (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10) -> t11 & ef, a1: m[t1], a2: m[t2], a3: m[t3], a4: m[t4], a5: m[t5], a6: m[t6], a7: m[t7], a8: m[t8], a9: m[t9], a10: m[t10]): m[t11] & ef = 
+        liftA9(f, a1, a2, a3, a4, a5, a6, a7, a8, a9) <*> a10
 
 }
