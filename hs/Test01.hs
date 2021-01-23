@@ -89,5 +89,8 @@ my_many v = my_some v <|> pure []
 my_some :: Alternative f => f a -> f [a]
 my_some v = v <:> my_many v
 
-
+-- This is not equivalent to mfilter - `mfilterAlt odd (Just 5)` gives the "wrong" answer
+mfilterAlt :: Alternative m => (a -> Bool) ->  m a -> m a
+mfilterAlt f mx = 
+    (\x y -> if f(x) then x else y) <$> mx <*> empty
         

@@ -38,7 +38,7 @@ instance Monad[Option] {
 namespace Monad {
     
     use Applicative.{point};
-    use Alternative.{alt};
+    use Alternative.{alt, zero};
     use Monad.{bind};
 
     pub def >>=[a, b, m :# Type -> Type : Monad](x: m[a], k: a -> m[b]): m[b] =
@@ -68,6 +68,8 @@ namespace Monad {
     pub def whenFalseM[a, m :# Type -> Type : Monad](test: m[Bool], ma: m[a]): m[Option[a]] = 
         bind(test, x -> Applicative.whenFalse(x, ma))
 
+    pub def mfilter[a, m :# Type -> Type : Monad : Alternative](f: a -> Bool, mx: m[a]): m[a] = 
+        bind(mx, x -> if (f(x)) point(x) else zero())
 
 
     pub def chainl[a, m :# Type -> Type : Monad : Alternative](p: m[a], op: m[(a, a) -> a], x: a): m[a] = 
