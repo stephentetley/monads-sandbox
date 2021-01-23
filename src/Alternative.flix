@@ -56,8 +56,22 @@ namespace Alternative {
         alt(Functor.map(x1 -> Some(x1), v), point(None))
 
     
-    pub def tryWithDefault[a, m :# Type -> Type : Alternative](v: m[a], d: a): m[a] =         
+    pub def optionalWithDefault[a, m :# Type -> Type : Alternative](v: m[a], d: a): m[a] =         
         alt(v, point(d))
+
+    pub def choice[a, m :# Type -> Type: Alternative](xs: List[m[a]]): m[a] = 
+        List.foldRight(alt, zero(), xs)
+    
+    /// WARNING - not tail recursive!
+    pub def count[a, m :# Type -> Type: Alternative](ntimes: Int32, mx: m[a]): m[List[a]] = 
+        use Applicative.{consA};
+        if (ntimes <= 0)
+            point(Nil)
+        else
+            consA(mx, count(ntimes - 1, mx))
+
+
+
 
 
 }

@@ -45,12 +45,24 @@ instance Applicative[Option] {
 
 namespace Applicative {
 
+    /// For Functor ...
+    pub def ignore[a, m :# Type -> Type : Functor](mx: m[a]): m[Unit] =
+        Functor.map(constant(), mx)
+
+
     // Haskell's <$>
     pub def <&>[a, b, ef, m :# Type -> Type : Functor](f: a -> b & ef, mx: m[a]): m[b] & ef =
         Functor.map(f, mx)
 
     pub def <&[a, b, m :# Type -> Type : Functor](x: a, mx: m[b]): m[a] =
         Functor.map(_ -> x, mx)
+
+    /// Applicative functions...
+
+
+    ///  Applicative cons.
+    pub def consA[a, m :# Type -> Type : Applicative](f: m[a], fs: m[List[a]]): m[List[a]] =
+        (((x, xs) -> x :: xs) <&> f) <*> fs
 
     // Haskell's <*> (i.e `ap`)
     pub def <*>[a, b, ef, m :# Type -> Type : Applicative](f: m[a -> b & ef], mx: m[a]): m[b] & ef =
@@ -73,6 +85,33 @@ namespace Applicative {
     pub def *>[a, b, m :# Type -> Type : Applicative](mx: m[a], my: m[b]): m[b] = seqRight(mx, my)
 
 
+    pub def between[a, o, c, m :# Type -> Type : Applicative](start: m[o], end: m[c], mx: m[a]): m[a] = 
+        seqLeft((seqRight(start, mx)), end)
+
+
+    pub def whenTrue[a, m :# Type -> Type : Applicative](test: Bool, ma: m[a]): m[Option[a]] = 
+        match test { 
+            case true => Functor.map(Some, ma)
+            case false => point(None)
+        }
+
+    pub def whenFalse[a, m :# Type -> Type : Applicative](test: Bool, ma: m[a]): m[Option[a]] = 
+        match test { 
+            case true => point(None)
+            case false => Functor.map(Some, ma)
+        }
+
+    /// pub def whenSome[a, b, m :# Type -> Type : Applicative](x: Option[a], f: a -> m[b]): m[Option[b]] = 
+    ///     match x { 
+    ///         case Some(a) => Functor.map(Some, f(a))
+    ///         case None => point(None)
+    ///     }
+
+    /// pub def whenNone[a, b, m :# Type -> Type : Applicative](x: Option[a], ma: m[b]): m[Option[b]] = 
+    ///     match x { 
+    ///         case Some(_) => point(None)
+    ///         case None => Functor.map(Some, ma)
+    ///     }
 
     pub def liftA2[t1, t2, t3, ef, m :# Type -> Type : Applicative](f: (t1, t2) -> t3 & ef, a1: m[t1], a2: m[t2]): m[t3] & ef = 
         (((x1, x2) -> f(x1, x2)) <&> a1) <*> a2
@@ -100,5 +139,6 @@ namespace Applicative {
 
     pub def liftA10[t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, ef, m :# Type -> Type : Applicative](f: (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10) -> t11 & ef, a1: m[t1], a2: m[t2], a3: m[t3], a4: m[t4], a5: m[t5], a6: m[t6], a7: m[t7], a8: m[t8], a9: m[t9], a10: m[t10]): m[t11] & ef = 
         liftA9(f, a1, a2, a3, a4, a5, a6, a7, a8, a9) <*> a10
+
 
 }

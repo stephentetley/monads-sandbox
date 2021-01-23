@@ -56,6 +56,10 @@ namespace Monad {
     pub def <=<[a, b, c, m :# Type -> Type : Monad](f1: b -> m[c], f2: a -> m[b]): a -> m[c] = x -> 
         kleisliRight(f1, f2, x)
 
+    pub def whenTrueM[a, m :# Type -> Type : Monad](test: m[Bool], ma: m[a]): m[Option[a]] = 
+        bind(test, x -> Applicative.whenTrue(x, ma))
 
+    pub def whenFalseM[a, m :# Type -> Type : Monad](test: m[Bool], ma: m[a]): m[Option[a]] = 
+        bind(test, x -> Applicative.whenFalse(x, ma))
 
 }
