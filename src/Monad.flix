@@ -33,4 +33,29 @@ instance Monad[List] {
 
 namespace Monad {
 
+    use Monad.{bind};
+
+    pub def >>=[a, b, m :# Type -> Type : Monad](x: m[a], k: a -> m[b]): m[b] =
+        bind(x, k)
+
+    pub def =<<[a, b, m :# Type -> Type : Monad](k: a -> m[b], x: m[a]): m[b] =
+        bind(x, k)
+
+
+    pub def kleisliLeft[a, b, c, m :# Type -> Type : Monad](f1: a -> m[b], f2: b -> m[c]): a -> m[c] = x ->
+        bind(f1(x), x1 -> f2(x1))
+
+    pub def kleisliRight[a, b, c, m :# Type -> Type : Monad](f1: b -> m[c], f2: a -> m[b]): a -> m[c] = x -> 
+        bind(f2(x), x1 -> f1(x1))      
+    
+    /// Alias for `kleisliLeft`
+    pub def >=>[a, b, c, m :# Type -> Type : Monad](f1: a -> m[b], f2: b -> m[c]): a -> m[c] = x ->
+        kleisliLeft(f1, f2, x)
+
+    /// Alias for `kleisliRight`
+    pub def <=<[a, b, c, m :# Type -> Type : Monad](f1: b -> m[c], f2: a -> m[b]): a -> m[c] = x -> 
+        kleisliRight(f1, f2, x)
+
+
+
 }

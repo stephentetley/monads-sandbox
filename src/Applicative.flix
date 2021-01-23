@@ -49,6 +49,9 @@ namespace Applicative {
     pub def <&>[a, b, ef, m :# Type -> Type : Functor](f: a -> b & ef, mx: m[a]): m[b] & ef =
         Functor.map(f, mx)
 
+    pub def <&[a, b, m :# Type -> Type : Functor](x: a, mx: m[b]): m[a] =
+        Functor.map(_ -> x, mx)
+
     // Haskell's <*> (i.e `ap`)
     pub def <*>[a, b, ef, m :# Type -> Type : Applicative](f: m[a -> b & ef], mx: m[a]): m[b] & ef =
         Applicative.ap(f, mx)

@@ -33,16 +33,31 @@ instance Alternative[List] {
 
     def alt(x: List[a] , y: List[a]): List[a] = List.append(x,y)
 }
+    
+instance Alternative[Option] { 
+    def zero(): Option[a] = None
 
+    def alt(x: Option[a], y: Option[a]): Option[a] = 
+        match x { 
+            case Some(x1) => Some(x1)
+            case None => y
+        }
+}
 
 namespace Alternative {
+    use Applicative.{<&>, point};
+    use Alternative.{alt};
 
     pub def <|>[a, m :# Type -> Type : Alternative](x: m[a] , y: m[a]): m[a] = 
-        Alternative.alt(x, y)
+        alt(x, y)
     
     ///  One or none.
     pub def optional[a, m :# Type -> Type : Alternative](v: m[a]): m[Option[a]] = 
-        use Applicative.{<&>, point};
-        ((x1 -> Some(x1)) <&> v) <|> point(None)
+        alt(Functor.map(x1 -> Some(x1), v), point(None))
+
+    
+    pub def tryWithDefault[a, m :# Type -> Type : Alternative](v: m[a], d: a): m[a] =         
+        alt(v, point(d))
+
 
 }

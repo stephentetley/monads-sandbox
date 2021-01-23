@@ -23,14 +23,14 @@ namespace MonadLib/Monads {
 
     pub opaque type Id[a] = a
 
+    pub opaque type Exception[i, a] = Result[a, i]
+
     /// ??? How to deal with effects?
     pub opaque type Reader[ef, a] = Int32 -> a & ef
 
     pub opaque type Writer[i, a] = (i, a)
 
     pub opaque type State[i, a] = i -> (i, a)
-
-    pub opaque type Exception[i, a] = Result[a, i]
 
     pub opaque type Cont[i, a] = a -> i -> i
 
@@ -41,6 +41,15 @@ namespace MonadLib/Monads {
             let Id(x1) = x;
             Id(f(x1))
     
+    }
+
+    instance Functor[Exception[i]] { 
+        def map(f: a -> b & ef, x: Exception[i, a]): Exception[i, b] & ef =
+            let Exception(x1) = x;
+            match x1 { 
+                case Ok(a) => {let b = f(a); Exception(Ok(b))}
+                case Err(e) => Exception(Err(e)) as & ef
+            }
     }
 
     /// instance Functor[Reader[ef]] { 
@@ -62,6 +71,23 @@ namespace MonadLib/Monads {
             Id(f1(x1))
     }
     
+    instance Applicative[Exception[i]] { 
+        def point(x: a): Exception[i, a] = Exception(Ok(x))
+
+        def ap(f: Exception[i, a -> b & ef], x: Exception[i, a]): Exception[i, b] & ef =
+            let Exception(f1) = f;            
+            match f1 { 
+                case Ok(g) => { 
+                    let Exception(x1) = x;
+                    match x1 {
+                        case Ok(y) => {let b = g(y); Exception(Ok(b))}
+                        case Err(e2) => Exception(Err(e2)) as & ef
+                    }
+                }
+                case Err(e1) => Exception(Err(e1)) as & ef
+            }
+    }
+
     /// instance Applicative[Reader] { 
     ///     def point(x: a): Reader[i, a] = Reader(_ -> x)
 
@@ -74,7 +100,7 @@ namespace MonadLib/Monads {
     ///             f(a)
     ///         })
     /// }
-    
+
 
     instance Monad[Id] { 
         def bind(x: Id[a], k: a -> Id[b]): Id[b] = 
