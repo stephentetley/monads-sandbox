@@ -36,7 +36,9 @@ instance Monad[Option] {
 
 
 namespace Monad {
-
+    
+    use Applicative.{point};
+    use Alternative.{alt};
     use Monad.{bind};
 
     pub def >>=[a, b, m :# Type -> Type : Monad](x: m[a], k: a -> m[b]): m[b] =
@@ -65,5 +67,28 @@ namespace Monad {
 
     pub def whenFalseM[a, m :# Type -> Type : Monad](test: m[Bool], ma: m[a]): m[Option[a]] = 
         bind(test, x -> Applicative.whenFalse(x, ma))
+
+
+
+    pub def chainl[a, m :# Type -> Type : Monad : Alternative](p: m[a], op: m[(a, a) -> a], x: a): m[a] = 
+        alt(chainl1(p,op), point(x))
+
+    pub def chainl1[a, m :# Type -> Type : Monad : Alternative](p: m[a], op: m[(a, a) -> a]): m[a] = 
+        bind(p, v1 -> chainl1Helper(p, op, v1))
+        
+    def chainl1Helper[a, m :# Type -> Type : Monad : Alternative](p: m[a], op: m[(a, a) -> a], x: a): m[a] = 
+        alt(bind(op, f -> bind(p, v1 -> chainl1Helper(p, op, f(x, v1))))
+            , point(x))
+
+    pub def chainr1[a, m :# Type -> Type : Monad : Alternative](p: m[a], op: m[(a, a) -> a]): m[a] = 
+        bind(p, v1 -> chainr1Helper(p, op, v1))
+    
+    def chainr1Helper[a, m :# Type -> Type : Monad : Alternative](p: m[a], op: m[(a, a) -> a], x: a): m[a] = 
+        alt(chainr1Step(p, op, x), point(x))
+
+    def chainr1Step[a, m :# Type -> Type : Monad : Alternative](p: m[a], op: m[(a, a) ->a], x: a): m[a] = 
+        bind(op, f -> 
+            bind(bind(p, v1 -> chainr1Helper(p, op, v1)), y -> 
+                bind(chainr1Helper(p,op, f(x,y)), ans -> point(ans))))
 
 }

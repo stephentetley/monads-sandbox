@@ -124,13 +124,14 @@ namespace Applicative {
 
     /// aka Haskell's mapM but it just needs Applicative...
     /// Caution - this does not short-circuit if `m` supports failure
-    def mapA[a, b, m :# Type -> Type : Applicative](f: a -> m[b], xs: List[a]): m[List[b]] =
+    pub def mapA[a, b, m :# Type -> Type : Applicative](f: a -> m[b], xs: List[a]): m[List[b]] =
         mapAHelper(f, xs, mks -> mks)
 
     def mapAHelper[a, b, m :# Type -> Type : Applicative](f: a -> m[b], xs: List[a], k: m[List[b]] -> m[List[b]]): m[List[b]] = match xs { 
         case x :: rs => mapAHelper(f, rs, mks -> k(consA(f(x), mks)))
         case Nil => k(point(Nil))
     }
+
 
     pub def liftA2[t1, t2, t3, ef, m :# Type -> Type : Applicative](f: (t1, t2) -> t3 & ef, a1: m[t1], a2: m[t2]): m[t3] & ef = 
         (((x1, x2) -> f(x1, x2)) <&> a1) <*> a2

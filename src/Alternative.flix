@@ -45,7 +45,7 @@ instance Alternative[Option] {
 }
 
 namespace Alternative {
-    use Applicative.{<&>, point};
+    use Applicative.{<&>, point, consA};
     use Alternative.{alt};
 
     pub def <|>[a, m :# Type -> Type : Alternative](x: m[a] , y: m[a]): m[a] = 
@@ -62,8 +62,15 @@ namespace Alternative {
     pub def choice[a, m :# Type -> Type: Alternative](xs: List[m[a]]): m[a] = 
         List.foldRight(alt, zero(), xs)
 
+    /// Warning - will crash unless the Alternative instance "shrinks" like Parser combinators
+    /// that consume thier input.
+    pub def many[a, m :# Type -> Type: Alternative](mx: m[a]): m[List[a]] = 
+        alt(many1(mx), point(Nil))
 
-
+    /// Warning - will crash unless the Alternative instance "shrinks" like Parser combinators
+    /// that consume thier input.
+    pub def many1[a, m :# Type -> Type: Alternative](mx: m[a]): m[List[a]] = 
+        consA(mx, many(mx))
 
 
 

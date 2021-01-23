@@ -26,7 +26,7 @@ namespace MonadLib/Monads {
     pub opaque type Exception[i, a] = Result[a, i]
 
     /// ??? How to deal with effects?
-    pub opaque type Reader[ef, a] = Int32 -> a & ef
+    pub opaque type Reader[i, ef, a] = i -> a & ef
 
     pub opaque type Writer[i, a] = (i, a)
 
@@ -52,12 +52,12 @@ namespace MonadLib/Monads {
             }
     }
 
-    /// instance Functor[Reader[ef]] { 
-    ///     def map(f: a -> b & ef, x: Reader[ef, a]): Reader[ef, b] & ef = 
+    /// instance Functor[Reader[i, Impure]] { 
+    ///     def map(f: a -> b & ef, x: Reader[i, Impure, a]): Reader[i, Impure, b] & Impure = 
     ///         let Reader(f1) = x;
     ///         Reader(r -> {
     ///             let a = f1(r); 
-    ///             f(a)
+    ///             f(a) as & Impure
     ///         })
     /// }
 

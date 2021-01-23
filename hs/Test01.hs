@@ -82,3 +82,12 @@ mapM_cpsHelper f xs k =
     case xs of 
         x : rs -> mapM_cpsHelper f rs (\mks -> k (f x <:> mks))
         [] -> k (pure [])
+        
+my_many :: Alternative f => f a -> f [a]
+my_many v = my_some v <|> pure []
+
+my_some :: Alternative f => f a -> f [a]
+my_some v = v <:> my_many v
+
+
+        
