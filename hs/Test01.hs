@@ -55,3 +55,30 @@ list_countAc02 = countAc 10 [1]
 
 list_countAc03 :: [[Int]]          
 list_countAc03 = countAc 3 [1, 2]
+
+option_mapM01 :: Maybe [Int]
+option_mapM01 = mapM return [1, 2, 3]
+
+option_mapM02 :: Maybe [Int]
+option_mapM02 = mapM (const Nothing) [1, 2, 3]
+
+-- No short circuit...
+mapM_acc :: Monad m => (a -> m b) -> [a] -> m [b]
+mapM_acc f xs = fmap reverse $ mapM_accHelper f xs (return [])
+
+mapM_accHelper :: Monad m => (a -> m b) -> [a] -> m [b] ->  m [b]
+mapM_accHelper f xs ac =
+    case xs of 
+        x : rs -> mapM_accHelper f rs (f x <:> ac)
+        [] -> ac
+
+
+-- No short circuit...
+mapM_cps :: Monad m => (a -> m b) -> [a] -> m [b]
+mapM_cps f xs = mapM_cpsHelper f xs (\ks -> ks)
+
+mapM_cpsHelper :: Monad m => (a -> m b) -> [a] -> (m [b] -> m [b]) ->  m [b]
+mapM_cpsHelper f xs k =
+    case xs of 
+        x : rs -> mapM_cpsHelper f rs (\mks -> k (f x <:> mks))
+        [] -> k (pure [])

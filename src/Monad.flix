@@ -30,6 +30,10 @@ instance Monad[List] {
     def bind(f: List[a], k: a -> List[b]): List[b] = List.flatMap(k, f)
 }
 
+instance Monad[Option] {
+    def bind(f: Option[a], k: a -> Option[b]): Option[b] = Option.flatMap(k, f)
+}
+
 
 namespace Monad {
 
