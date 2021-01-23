@@ -61,14 +61,7 @@ namespace Alternative {
 
     pub def choice[a, m :# Type -> Type: Alternative](xs: List[m[a]]): m[a] = 
         List.foldRight(alt, zero(), xs)
-    
-    /// WARNING - not tail recursive!
-    pub def count[a, m :# Type -> Type: Alternative](ntimes: Int32, mx: m[a]): m[List[a]] = 
-        use Applicative.{consA};
-        if (ntimes <= 0)
-            point(Nil)
-        else
-            consA(mx, count(ntimes - 1, mx))
+
 
 
 

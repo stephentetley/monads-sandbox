@@ -113,6 +113,16 @@ namespace Applicative {
     ///         case None => Functor.map(Some, ma)
     ///     }
 
+    pub def count[a, m :# Type -> Type : Applicative](ntimes: Int32, mx: m[a]): m[List[a]] = 
+        countHelper(ntimes, mx, point(Nil))
+
+    def countHelper[a, m :# Type -> Type : Applicative](ntimes: Int32, mx: m[a], ac: m[List[a]]): m[List[a]] = 
+        if (ntimes <= 0)
+            ac
+        else 
+            countHelper(ntimes - 1, mx, consA(mx, ac))
+
+
     pub def liftA2[t1, t2, t3, ef, m :# Type -> Type : Applicative](f: (t1, t2) -> t3 & ef, a1: m[t1], a2: m[t2]): m[t3] & ef = 
         (((x1, x2) -> f(x1, x2)) <&> a1) <*> a2
 

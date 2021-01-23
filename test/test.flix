@@ -1,5 +1,5 @@
-use Applicative.{point};
-use Alternative.{optionalWithDefault, count};
+use Applicative.{point, count};
+use Alternative.{optionalWithDefault};
 use MonadLib/Transformers.{Id};
 use MonadLib/Transformers.Id.{Id};  /// temp
 use MonadLib/Transformers.{runId};
