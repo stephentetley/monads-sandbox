@@ -94,3 +94,4 @@ mfilterAlt :: Alternative m => (a -> Bool) ->  m a -> m a
 mfilterAlt f mx = 
     (\x y -> if f(x) then x else y) <$> mx <*> empty
         
+mapandunzip01 = mapAndUnzipM (\a -> Just (show a, a + 1)) [1 .. 10]

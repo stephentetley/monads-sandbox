@@ -113,14 +113,25 @@ namespace Applicative {
     ///         case None => Functor.map(Some, ma)
     ///     }
 
-    pub def count[a, m :# Type -> Type : Applicative](ntimes: Int32, mx: m[a]): m[List[a]] = 
-        countHelper(ntimes, mx, point(Nil))
+    pub def replicateA[a, m :# Type -> Type : Applicative](ntimes: Int32, mx: m[a]): m[List[a]] = 
+        replicateAHelper(ntimes, mx, point(Nil))
 
-    def countHelper[a, m :# Type -> Type : Applicative](ntimes: Int32, mx: m[a], ac: m[List[a]]): m[List[a]] = 
+    def replicateAHelper[a, m :# Type -> Type : Applicative](ntimes: Int32, mx: m[a], ac: m[List[a]]): m[List[a]] = 
         if (ntimes <= 0)
             ac
         else 
-            countHelper(ntimes - 1, mx, consA(mx, ac))
+            replicateAHelper(ntimes - 1, mx, consA(mx, ac))
+
+    pub def replicateX[a, m :# Type -> Type : Applicative](ntimes: Int32, mx: m[a]): m[Unit] = 
+        replicateXHelper(ntimes, mx, point(()))
+
+    def replicateXHelper[a, m :# Type -> Type : Applicative](ntimes: Int32, mx: m[a], ac: m[Unit]): m[Unit] = 
+        if (ntimes <= 0)
+            ac
+        else 
+            replicateXHelper(ntimes - 1, mx, ignore(mx))
+
+
 
     /// aka Haskell's mapM but it just needs Applicative...
     /// Caution - this does not short-circuit if `m` supports failure
@@ -174,6 +185,19 @@ namespace Applicative {
     def whenConsA[a, m :# Type -> Type : Applicative](f: a -> m[Bool], x: a, fs: m[List[a]]): m[List[a]] =
         (((test, xs) -> if (test) (x :: xs) else xs) <&> f(x)) <*> fs
 
+
+    pub def mapAndUnzipA[a, b, c, m :# Type -> Type : Monad](f: a -> m[(b, c)], xs: List[a]): m[(List[b], List[c])] = 
+        mapAndUnzipAHelper(f, xs, mks -> mks)
+
+    def mapAndUnzipAHelper[a, b, c, m :# Type -> Type : Monad](f: a -> m[(b, c)], xs: List[a], k: m[(List[b], List[c])] -> m[(List[b], List[c])]): m[(List[b], List[c])] = match xs {
+        case x :: rs1 => mapAndUnzipAHelper(f, rs1, mks -> k(doubleConsA(f(x), mks)))
+        case Nil => k(point((Nil, Nil)))
+    }
+
+    def doubleConsA[a, b, m :# Type -> Type : Applicative](mx: m[(a, b)], rs: m[(List[a], List[b])]): m[(List[a], List[b])] =
+        (((a, b) -> {let (x, y) = a; let (xs, ys) = b; (x :: xs, y :: ys)}) <&> mx) <*> rs
+
+
     pub def zipWithA[a, b, c, m :# Type -> Type : Applicative](f: (a, b) -> m[c], xs: List[a], ys: List[b]): m[List[c]] = 
         zipWithAHelper(f, xs, ys, mks -> mks)
 
@@ -191,7 +215,7 @@ namespace Applicative {
         case (_, _) => ac
     }
 
-    
+
     
     pub def liftA2[t1, t2, t3, ef, m :# Type -> Type : Applicative](f: (t1, t2) -> t3 & ef, a1: m[t1], a2: m[t2]): m[t3] & ef = 
         (((x1, x2) -> f(x1, x2)) <&> a1) <*> a2

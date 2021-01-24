@@ -90,6 +90,8 @@ namespace Monad {
         case x :: rs => foldRightMHelper(f, s, rs, ms -> k(bind(ms, s1 -> f(x, s1))))
     }
 
+
+
     /// Chains
 
     pub def chainl[a, m :# Type -> Type : Monad : Alternative](p: m[a], op: m[(a, a) -> a], x: a): m[a] = 
