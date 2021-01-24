@@ -46,13 +46,17 @@ instance Alternative[Option] {
 
 namespace Alternative {
     use Applicative.{<&>, point, consA};
-    use Alternative.{alt};
+    use Alternative.{alt, zero};
 
     pub def <|>[a, m :# Type -> Type : Alternative](x: m[a] , y: m[a]): m[a] = 
         alt(x, y)
     
     pub def guard[m :# Type -> Type: Alternative](x: Bool): m[Unit] = 
         if (x) point(()) else zero()
+
+    pub def asum[a, m :# Type -> Type : Alternative](xs: List[m[a]]): m[a] = 
+        List.foldRight(alt, zero(), xs)
+
 
     ///  One or none.
     pub def optional[a, m :# Type -> Type : Alternative](v: m[a]): m[Option[a]] = 

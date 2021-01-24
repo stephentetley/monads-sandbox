@@ -174,7 +174,25 @@ namespace Applicative {
     def whenConsA[a, m :# Type -> Type : Applicative](f: a -> m[Bool], x: a, fs: m[List[a]]): m[List[a]] =
         (((test, xs) -> if (test) (x :: xs) else xs) <&> f(x)) <*> fs
 
+    pub def zipWithA[a, b, c, m :# Type -> Type : Applicative](f: (a, b) -> m[c], xs: List[a], ys: List[b]): m[List[c]] = 
+        zipWithAHelper(f, xs, ys, mks -> mks)
 
+    def zipWithAHelper[a, b, c, m :# Type -> Type : Applicative](f: (a, b) -> m[c], xs: List[a], ys: List[b], k: m[List[c]] -> m[List[c]]): m[List[c]] = match (xs, ys) {
+        case (x :: rs1, y :: rs2) => zipWithAHelper(f, rs1, rs2, mks -> k(consA(f(x, y), mks)))
+        case (_, _) => k(point(Nil))
+    }
+
+
+    pub def zipWithX[a, b, c, m :# Type -> Type : Applicative](f: (a, b) -> m[c], xs: List[a], ys: List[b]): m[Unit] = 
+        zipWithXHelper(f, xs, ys, point(()))
+
+    def zipWithXHelper[a, b, c, m :# Type -> Type : Applicative](f: (a, b) -> m[c], xs: List[a], ys: List[b], ac: m[Unit]): m[Unit] = match (xs, ys) {
+        case (x :: rs1, y :: rs2) => zipWithXHelper(f, rs1, rs2, ignore(f(x, y)))
+        case (_, _) => ac
+    }
+
+    
+    
     pub def liftA2[t1, t2, t3, ef, m :# Type -> Type : Applicative](f: (t1, t2) -> t3 & ef, a1: m[t1], a2: m[t2]): m[t3] & ef = 
         (((x1, x2) -> f(x1, x2)) <&> a1) <*> a2
 

@@ -71,6 +71,26 @@ namespace Monad {
     pub def mfilter[a, m :# Type -> Type : Monad : Alternative](f: a -> Bool, mx: m[a]): m[a] = 
         bind(mx, x -> if (f(x)) point(x) else zero())
 
+    pub def foldLeftM[a, b, m :# Type -> Type : Monad](f: (b, a) -> m[b], s: b, xs: List[a]): m[b] = 
+        foldLeftMHelper(f, point(s), xs)
+
+    def foldLeftMHelper[a, b, m :# Type -> Type : Monad](f: (b, a) -> m[b], s: m[b], xs: List[a]): m[b] = match xs {
+        case Nil => s
+        case x :: rs => foldLeftMHelper(f, bind(s, s1 -> f(s1, x)), rs)
+    }
+
+    pub def foldRightM[a, b, m :# Type -> Type : Monad](f: (a, b) -> m[b], s: b, xs: List[a]): m[b] = 
+        foldRightMHelper(f, point(s), xs, ms -> ms)
+
+    ///
+    /// Helper function for `foldRightM`.
+    ///
+    def foldRightMHelper[a, b, m :# Type -> Type : Monad](f: (a, b) -> m[b], s: m[b], xs: List[a], k: m[b] -> m[b]): m[b] = match xs {
+        case Nil => k(s)
+        case x :: rs => foldRightMHelper(f, s, rs, ms -> k(bind(ms, s1 -> f(x, s1))))
+    }
+
+    /// Chains
 
     pub def chainl[a, m :# Type -> Type : Monad : Alternative](p: m[a], op: m[(a, a) -> a], x: a): m[a] = 
         alt(chainl1(p,op), point(x))
