@@ -17,6 +17,7 @@ def countAcHelper[a, m :# Type -> Type : Applicative](ntimes: Int32, mx: m[a], a
     else 
         countAcHelper(ntimes - 1, mx, consA(mx, ac))
 
+/// count is replicateM
 
 def main(_args: Array[String]): Int32 & Impure = 
     Console.printLine("Running");

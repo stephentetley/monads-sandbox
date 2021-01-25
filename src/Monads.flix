@@ -26,7 +26,9 @@ namespace MonadLib/Monads {
     pub opaque type Exception[i, a] = Result[a, i]
 
     /// ??? How to deal with effects?
-    pub opaque type Reader[i, ef, a] = i -> a & ef
+    pub enum Reader[ef :# Bool, i, a] { 
+        case Reader(i -> a & ef)
+    }
 
     pub opaque type Writer[i, a] = (i, a)
 
@@ -51,6 +53,13 @@ namespace MonadLib/Monads {
                 case Err(e) => Exception(Err(e)) as & ef
             }
     }
+
+    instance Functor[Writer[i]] { 
+        def map(f: a -> b & ef, x: Writer[i, a]): Writer[i, b] & ef =
+            let Writer((w, a)) = x;
+            Writer((w, f(a)))
+    }
+
 
     /// instance Functor[Reader[i, Impure]] { 
     ///     def map(f: a -> b & ef, x: Reader[i, Impure, a]): Reader[i, Impure, b] & Impure = 
@@ -88,6 +97,16 @@ namespace MonadLib/Monads {
             }
     }
 
+    instance Applicative[Writer[i]] with [i : Monoid] { 
+        def point(x: a): Writer[i, a] = Writer((Monoid.empty(), x))
+
+        def ap(f: Writer[i, a -> b & ef], x: Writer[i, a]): Writer[i, b] & ef = 
+            let Writer((w1, f1)) = f;
+            let Writer((w2, x1)) = x;
+            Writer((Monoid.combine(w1, w2), f1(x1)))
+    }
+
+
     /// instance Applicative[Reader] { 
     ///     def point(x: a): Reader[i, a] = Reader(_ -> x)
 
@@ -102,11 +121,49 @@ namespace MonadLib/Monads {
     /// }
 
 
+
+    /// pub def mapReader[a, b, i, ef :# Bool](f: a -> b & ef, x: Reader[ef, i, a]): Reader[ef, i, b] = 
+    ///     match x { 
+    ///         case Reader(f1) => { 
+    ///             Reader(r -> {let a = f1(r); f(a)})
+    ///         }
+    ///     }
+
+
+    instance Alternative[Exception[i]] with [i : Monoid]{ 
+        def zero(): Exception[i, a] = Exception(Err(Monoid.empty()))
+
+        def alt(x: Exception[i, a], y: Exception[i, a]): Exception[i, a] =
+            let Exception(x1) = x;
+            match x1 { 
+                case Ok(a1) => Exception(Ok(a1))
+                case Err(_) => y
+            }
+    }
+
+
     instance Monad[Id] { 
         def bind(x: Id[a], k: a -> Id[b]): Id[b] = 
             let Id(x1) = x;
             k(x1)
     }
+
+    instance Monad[Exception[i]] { 
+        def bind(x: Exception[i, a], k: a -> Exception[i, b]): Exception[i, b] = 
+            let Exception(x1) = x;
+            match x1 { 
+                case Ok(a) => k(a)
+                case Err(e) => Exception(Err(e))
+            }
+    }
+
+    instance Monad[Writer[i]] with [i : Monoid] { 
+        def bind(x: Writer[i, a], k: a -> Writer[i, b]): Writer[i, b] = 
+            let Writer((w1, x1)) = x;
+            let Writer((w2, b)) = k(x1);
+            Writer((Monoid.combine(w1, w2), b))
+    }
+
 
     /// instance Monad[Reader] { 
     ///     def bind(x: Reader[i, a], k: a -> Reader[i, b]): Reader[i, b] = 
