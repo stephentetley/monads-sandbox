@@ -23,7 +23,7 @@ class Alternative[m :# Type -> Type] extends Applicative[m] {
 
     pub def zero(): m[a]
 
-    pub def alt(x: m[a] , y: m[a]): m[a] 
+    pub def alt(x: m[a], y: m[a]): m[a] 
 
 }
 
