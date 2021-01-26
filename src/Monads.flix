@@ -61,6 +61,14 @@ namespace MonadLib/Monads {
     }
 
 
+
+    /// pub def mapReader[a, b, i, ef :# Bool](f: a -> b & ef, x: Reader[ef, i, a]): Reader[ef, i, b] = 
+    ///     match x { 
+    ///         case Reader(f1) => { 
+    ///             Reader(r -> {let a = f1(r); f(a)})
+    ///         }
+    ///     }
+    
     /// instance Functor[Reader[i, Impure]] { 
     ///     def map(f: a -> b & ef, x: Reader[i, Impure, a]): Reader[i, Impure, b] & Impure = 
     ///         let Reader(f1) = x;
@@ -119,15 +127,6 @@ namespace MonadLib/Monads {
     ///             f(a)
     ///         })
     /// }
-
-
-
-    /// pub def mapReader[a, b, i, ef :# Bool](f: a -> b & ef, x: Reader[ef, i, a]): Reader[ef, i, b] = 
-    ///     match x { 
-    ///         case Reader(f1) => { 
-    ///             Reader(r -> {let a = f1(r); f(a)})
-    ///         }
-    ///     }
 
 
     instance Alternative[Exception[i]] with [i : Monoid]{ 
