@@ -1,8 +1,8 @@
 use Applicative.{point, replicateA, filterA, mapAndUnzipA};
 use Alternative.{optionalWithDefault};
-use MonadLib/Transformers.{Id};
-use MonadLib/Transformers.Id.{Id};  /// temp
-use MonadLib/Transformers.{runId};
+use MonadLib/Monads.{Id};
+use MonadLib/Monads.Id.{Id};  /// temp
+use MonadLib/Monads.{runId};
 
 
 def main(_args: Array[String]): Int32 & Impure = 

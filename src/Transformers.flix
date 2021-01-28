@@ -17,36 +17,37 @@
 
 namespace MonadLib/Transformers {
 
-    pub opaque type Id[a] = a
+ 
 
-    /// Transformers cause the compiler to crash
+    /// Transformers cause the compiler to crash...
+    
     /// pub opaque type IdT[m :# Type -> Type, a] = m[a]
 
 
-    instance Functor[Id] { 
-        def map(f: a -> b & e, x: Id[a]): Id[b] & e = 
-            let Id(x1) = x;
-            Id(f(x1))
+    /// instance Functor[Id] { 
+    ///     def map(f: a -> b & e, x: IdT[a]): IdT[b] & e = 
+    ///         let Id(x1) = x;
+    ///         Id(f(x1))
     
-    }
+    /// }
 
-    instance Applicative[Id] { 
-        def point(x: a): Id[a] = Id(x)
+    /// instance Applicative[Id] { 
+    ///     def point(x: a): Id[a] = Id(x)
 
-        def ap(f: Id[a -> b & ef], x: Id[a]): Id[b] & ef = 
-            let Id(f1) = f;
-            let Id(x1) = x;
-            Id(f1(x1))
-    }
+    ///     def ap(f: Id[a -> b & ef], x: Id[a]): Id[b] & ef = 
+    ///         let Id(f1) = f;
+    ///         let Id(x1) = x;
+    ///         Id(f1(x1))
+    /// }
     
-    instance Monad[Id] { 
-        def bind(x: Id[a], k: a -> Id[b]): Id[b] = 
-            let Id(x1) = x;
-            k(x1)
-    }
+    /// instance Monad[Id] { 
+    ///     def bind(x: Id[a], k: a -> Id[b]): Id[b] = 
+    ///         let Id(x1) = x;
+    ///         k(x1)
+    /// }
 
-    pub def runId(x: Id[a]): a = 
-        let Id(x1) = x;
-        x1
+    /// pub def runIdT[a, m :# Type -> Type : Functor](x: IdT[m, a]): m[a] = 
+    ///     let IdT(x1) = x;
+    ///     x1
 
 }

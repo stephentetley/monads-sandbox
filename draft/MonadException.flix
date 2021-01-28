@@ -15,6 +15,8 @@
  */
 
 
+/// This is probably a failed experiment - I think we really need multi-parameter
+/// type classes and a polymorphic error type
 
 ///
 /// A type class for exception handling in monads.
@@ -28,7 +30,18 @@ class MonadException[m :# Type -> Type] extends Monad[m] {
 }
 
 
+    /// instance MonadException[Exception[String]] { 
+    ///     def fail(msg: String, mx: Exception[String, a]): Exception[String, a] = Exception(Err(msg))
 
+    ///     pub def catch(x: Exception[String, a], f: String -> Exception[String, a]): Exception[String, a] = 
+    ///         let Exception(x1) = x;
+    ///         match x1 {
+    ///             case Ok(a) => Exception(Ok(a))
+    ///             case Err(msg) => f(msg)
+    ///         } 
+    /// }
+
+    
 namespace MonadException {
 
     use Functor.{map};

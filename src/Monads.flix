@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-///
-/// Acknowledgement: this is a port of Iavor S. Diatchki's Haskell `monadLib`.
-///
 
 
 namespace MonadLib/Monads {
@@ -164,6 +161,7 @@ namespace MonadLib/Monads {
     }
 
 
+
     /// instance Monad[Reader] { 
     ///     def bind(x: Reader[i, a], k: a -> Reader[i, b]): Reader[i, b] = 
     ///         let Reader(x1) = x;
@@ -180,9 +178,18 @@ namespace MonadLib/Monads {
         let Id(x1) = x;
         x1
 
-    /// pub def runReader(r: i, x: Reader[i, ef, a]): a & ef = 
+    pub def runException(x: Exception[i, a]): Result[a, i] = 
+        let Exception(x1) = x;
+        x1
+
+
+    /// pub def runReader(r: i, x: Reader[ef, i, a]): a & ef = 
     ///     let Reader(x1) = x;
     ///     x1(r)
+
+    pub def runWriter(x: Writer[i, a]): (i, a) = 
+        let Writer(x1) = x;
+        x1
 
 
 }
