@@ -36,14 +36,14 @@ namespace MonadLib/Monads {
     /// Instances
 
     instance Functor[Id] { 
-        def map(f: a -> b & ef, x: Id[a]): Id[b] & ef = 
+        pub def map(f: a -> b & ef, x: Id[a]): Id[b] & ef = 
             let Id(x1) = x;
             Id(f(x1))
     
     }
 
     instance Functor[Exception[i]] { 
-        def map(f: a -> b & ef, x: Exception[i, a]): Exception[i, b] & ef =
+        pub def map(f: a -> b & ef, x: Exception[i, a]): Exception[i, b] & ef =
             let Exception(x1) = x;
             match x1 { 
                 case Ok(a) => {let b = f(a); Exception(Ok(b))}
@@ -52,7 +52,7 @@ namespace MonadLib/Monads {
     }
 
     instance Functor[Writer[i]] { 
-        def map(f: a -> b & ef, x: Writer[i, a]): Writer[i, b] & ef =
+        pub def map(f: a -> b & ef, x: Writer[i, a]): Writer[i, b] & ef =
             let Writer((w, a)) = x;
             Writer((w, f(a)))
     }
@@ -77,18 +77,18 @@ namespace MonadLib/Monads {
 
 
     instance Applicative[Id] { 
-        def point(x: a): Id[a] = Id(x)
+        pub def return(x: a): Id[a] = Id(x)
 
-        def ap(f: Id[a -> b & ef], x: Id[a]): Id[b] & ef = 
+        pub def ap(f: Id[a -> b & ef], x: Id[a]): Id[b] & ef = 
             let Id(f1) = f;
             let Id(x1) = x;
             Id(f1(x1))
     }
     
     instance Applicative[Exception[i]] { 
-        def point(x: a): Exception[i, a] = Exception(Ok(x))
+        pub def return(x: a): Exception[i, a] = Exception(Ok(x))
 
-        def ap(f: Exception[i, a -> b & ef], x: Exception[i, a]): Exception[i, b] & ef =
+        pub def ap(f: Exception[i, a -> b & ef], x: Exception[i, a]): Exception[i, b] & ef =
             let Exception(f1) = f;            
             match f1 { 
                 case Ok(g) => { 
@@ -103,9 +103,9 @@ namespace MonadLib/Monads {
     }
 
     instance Applicative[Writer[i]] with [i : Monoid] { 
-        def point(x: a): Writer[i, a] = Writer((Monoid.empty(), x))
+        pub def return(x: a): Writer[i, a] = Writer((Monoid.empty(), x))
 
-        def ap(f: Writer[i, a -> b & ef], x: Writer[i, a]): Writer[i, b] & ef = 
+        pub def ap(f: Writer[i, a -> b & ef], x: Writer[i, a]): Writer[i, b] & ef = 
             let Writer((w1, f1)) = f;
             let Writer((w2, x1)) = x;
             Writer((Monoid.combine(w1, w2), f1(x1)))
@@ -113,7 +113,7 @@ namespace MonadLib/Monads {
 
 
     /// instance Applicative[Reader] { 
-    ///     def point(x: a): Reader[i, a] = Reader(_ -> x)
+    ///     def return(x: a): Reader[i, a] = Reader(_ -> x)
 
     ///     def ap(f: Reader[i, a -> b & ef], x: Reader[i, a]): Reader[i, b] & ef = 
     ///         let Reader(f1) = f;
@@ -127,9 +127,9 @@ namespace MonadLib/Monads {
 
 
     instance Alternative[Exception[i]] with [i : Monoid]{ 
-        def zero(): Exception[i, a] = Exception(Err(Monoid.empty()))
+        pub def zero(): Exception[i, a] = Exception(Err(Monoid.empty()))
 
-        def alt(x: Exception[i, a], y: Exception[i, a]): Exception[i, a] =
+        pub def alt(x: Exception[i, a], y: Exception[i, a]): Exception[i, a] =
             let Exception(x1) = x;
             match x1 { 
                 case Ok(a1) => Exception(Ok(a1))
@@ -139,13 +139,13 @@ namespace MonadLib/Monads {
 
 
     instance Monad[Id] { 
-        def bind(x: Id[a], k: a -> Id[b]): Id[b] = 
+        pub def bind(x: Id[a], k: a -> Id[b]): Id[b] = 
             let Id(x1) = x;
             k(x1)
     }
 
     instance Monad[Exception[i]] { 
-        def bind(x: Exception[i, a], k: a -> Exception[i, b]): Exception[i, b] = 
+        pub def bind(x: Exception[i, a], k: a -> Exception[i, b]): Exception[i, b] = 
             let Exception(x1) = x;
             match x1 { 
                 case Ok(a) => k(a)
@@ -154,7 +154,7 @@ namespace MonadLib/Monads {
     }
 
     instance Monad[Writer[i]] with [i : Monoid] { 
-        def bind(x: Writer[i, a], k: a -> Writer[i, b]): Writer[i, b] = 
+        pub def bind(x: Writer[i, a], k: a -> Writer[i, b]): Writer[i, b] = 
             let Writer((w1, x1)) = x;
             let Writer((w2, b)) = k(x1);
             Writer((Monoid.combine(w1, w2), b))

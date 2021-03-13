@@ -15,27 +15,21 @@
  */
 
 
-class Applicative[m :# Type -> Type] extends Functor[m] {
-    
-    pub def point(x: a): m[a] 
-
+pub lawless class Applicative[m :# Type -> Type] with Functor[m] {
+    pub def return(x: a): m[a] 
     pub def ap(f: m[a -> b & ef] , x: m[a]): m[b] & ef
-
 }
 
 
 instance Applicative[List] {
-
-    def point(x: a): List[a] = x :: Nil
-    
-    def ap(f: List[a -> b & ef], x: List[a]): List[b] & ef = List.zipWith((f1, a) -> f1(a), f, x)
+    pub def return(x: a): List[a] = x :: Nil
+    pub def ap(f: List[a -> b & ef], x: List[a]): List[b] & ef = List.zipWith((f1, a) -> f1(a), f, x)
 }
 
 instance Applicative[Option] {
-
-    def point(x: a): Option[a] = Some(x)
+    pub def return(x: a): Option[a] = Some(x)
     
-    def ap(f: Option[a -> b & ef], x: Option[a]): Option[b] & ef = 
+    pub def ap(f: Option[a -> b & ef], x: Option[a]): Option[b] & ef = 
         match f { 
             case None => None
             case Some(f1) => Option.map(f1, x)
@@ -92,29 +86,29 @@ namespace Applicative {
     pub def whenTrue[a, m :# Type -> Type : Applicative](test: Bool, ma: m[a]): m[Option[a]] = 
         match test { 
             case true => Functor.map(Some, ma)
-            case false => point(None)
+            case false => return(None)
         }
 
     pub def whenFalse[a, m :# Type -> Type : Applicative](test: Bool, ma: m[a]): m[Option[a]] = 
         match test { 
-            case true => point(None)
+            case true => return(None)
             case false => Functor.map(Some, ma)
         }
 
     /// pub def whenSome[a, b, m :# Type -> Type : Applicative](x: Option[a], f: a -> m[b]): m[Option[b]] = 
     ///     match x { 
     ///         case Some(a) => Functor.map(Some, f(a))
-    ///         case None => point(None)
+    ///         case None => return(None)
     ///     }
 
     /// pub def whenNone[a, b, m :# Type -> Type : Applicative](x: Option[a], ma: m[b]): m[Option[b]] = 
     ///     match x { 
-    ///         case Some(_) => point(None)
+    ///         case Some(_) => return(None)
     ///         case None => Functor.map(Some, ma)
     ///     }
 
     pub def replicateA[a, m :# Type -> Type : Applicative](ntimes: Int32, mx: m[a]): m[List[a]] = 
-        replicateAHelper(ntimes, mx, point(Nil))
+        replicateAHelper(ntimes, mx, return(Nil))
 
     def replicateAHelper[a, m :# Type -> Type : Applicative](ntimes: Int32, mx: m[a], ac: m[List[a]]): m[List[a]] = 
         if (ntimes <= 0)
@@ -123,7 +117,7 @@ namespace Applicative {
             replicateAHelper(ntimes - 1, mx, consA(mx, ac))
 
     pub def replicateX[a, m :# Type -> Type : Applicative](ntimes: Int32, mx: m[a]): m[Unit] = 
-        replicateXHelper(ntimes, mx, point(()))
+        replicateXHelper(ntimes, mx, return(()))
 
     def replicateXHelper[a, m :# Type -> Type : Applicative](ntimes: Int32, mx: m[a], ac: m[Unit]): m[Unit] = 
         if (ntimes <= 0)
@@ -140,11 +134,11 @@ namespace Applicative {
 
     def mapAHelper[a, b, m :# Type -> Type : Applicative](f: a -> m[b], xs: List[a], k: m[List[b]] -> m[List[b]]): m[List[b]] = match xs { 
         case x :: rs => mapAHelper(f, rs, mks -> k(consA(f(x), mks)))
-        case Nil => k(point(Nil))
+        case Nil => k(return(Nil))
     }
 
     pub def mapX[a, b, m :# Type -> Type : Applicative](f: a -> m[b], xs: List[a]): m[Unit] = 
-        mapXHelper(f, xs, point(()))
+        mapXHelper(f, xs, return(()))
 
     def mapXHelper[a, b, m :# Type -> Type : Applicative](f: a -> m[b], xs: List[a], ac: m[Unit]): m[Unit] = match xs { 
         case Nil => ac
@@ -163,11 +157,11 @@ namespace Applicative {
 
     def sequenceAHelper[a, m :# Type -> Type : Applicative](xs: List[m[a]], k: m[List[a]] -> m[List[a]]): m[List[a]] = match xs {
         case mx :: rs => sequenceAHelper(rs, mks -> k(consA(mx, mks)))
-        case Nil => k(point(Nil))
+        case Nil => k(return(Nil))
     }
 
     pub def sequenceX[a, m :# Type -> Type : Applicative](xs: List[m[a]]): m[Unit] = 
-        sequenceXHelper(xs, point(()))
+        sequenceXHelper(xs, return(()))
 
     def sequenceXHelper[a, m :# Type -> Type : Applicative](xs: List[m[a]], ac: m[Unit]): m[Unit] = match xs {
         case mx :: rs => sequenceXHelper(rs, ignore(mx))
@@ -179,7 +173,7 @@ namespace Applicative {
 
     def filterAHelper[a, m :# Type -> Type : Applicative](f: a -> m[Bool], xs: List[a], k: m[List[a]] -> m[List[a]]): m[List[a]] = match xs {
         case x :: rs => filterAHelper(f, rs, mks -> k(whenConsA(f, x, mks)))
-        case Nil => k(point(Nil))
+        case Nil => k(return(Nil))
     }
     
     def whenConsA[a, m :# Type -> Type : Applicative](f: a -> m[Bool], x: a, fs: m[List[a]]): m[List[a]] =
@@ -191,7 +185,7 @@ namespace Applicative {
 
     def mapAndUnzipAHelper[a, b, c, m :# Type -> Type : Monad](f: a -> m[(b, c)], xs: List[a], k: m[(List[b], List[c])] -> m[(List[b], List[c])]): m[(List[b], List[c])] = match xs {
         case x :: rs1 => mapAndUnzipAHelper(f, rs1, mks -> k(doubleConsA(f(x), mks)))
-        case Nil => k(point((Nil, Nil)))
+        case Nil => k(return((Nil, Nil)))
     }
 
     def doubleConsA[a, b, m :# Type -> Type : Applicative](mx: m[(a, b)], rs: m[(List[a], List[b])]): m[(List[a], List[b])] =
@@ -203,12 +197,12 @@ namespace Applicative {
 
     def zipWithAHelper[a, b, c, m :# Type -> Type : Applicative](f: (a, b) -> m[c], xs: List[a], ys: List[b], k: m[List[c]] -> m[List[c]]): m[List[c]] = match (xs, ys) {
         case (x :: rs1, y :: rs2) => zipWithAHelper(f, rs1, rs2, mks -> k(consA(f(x, y), mks)))
-        case (_, _) => k(point(Nil))
+        case (_, _) => k(return(Nil))
     }
 
 
     pub def zipWithX[a, b, c, m :# Type -> Type : Applicative](f: (a, b) -> m[c], xs: List[a], ys: List[b]): m[Unit] = 
-        zipWithXHelper(f, xs, ys, point(()))
+        zipWithXHelper(f, xs, ys, return(()))
 
     def zipWithXHelper[a, b, c, m :# Type -> Type : Applicative](f: (a, b) -> m[c], xs: List[a], ys: List[b], ac: m[Unit]): m[Unit] = match (xs, ys) {
         case (x :: rs1, y :: rs2) => zipWithXHelper(f, rs1, rs2, ignore(f(x, y)))

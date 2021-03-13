@@ -19,7 +19,7 @@
 ///
 /// A type class for moniodal applicative functors biased to "choice" / "alternative".
 ///
-class Alternative[m :# Type -> Type] extends Applicative[m] {
+pub lawless class Alternative[m :# Type -> Type] with Applicative[m] {
 
     pub def zero(): m[a]
 
@@ -29,15 +29,15 @@ class Alternative[m :# Type -> Type] extends Applicative[m] {
 
 
 instance Alternative[List] {
-    def zero(): List[a] = Nil
+    pub def zero(): List[a] = Nil
 
-    def alt(x: List[a] , y: List[a]): List[a] = List.append(x,y)
+    pub def alt(x: List[a] , y: List[a]): List[a] = List.append(x,y)
 }
     
 instance Alternative[Option] { 
-    def zero(): Option[a] = None
+    pub def zero(): Option[a] = None
 
-    def alt(x: Option[a], y: Option[a]): Option[a] = 
+    pub def alt(x: Option[a], y: Option[a]): Option[a] = 
         match x { 
             case Some(x1) => Some(x1)
             case None => y
@@ -45,14 +45,14 @@ instance Alternative[Option] {
 }
 
 namespace Alternative {
-    use Applicative.{<&>, point, consA};
+    use Applicative.{<&>, return, consA};
     use Alternative.{alt, zero};
 
     pub def <|>[a, m :# Type -> Type : Alternative](x: m[a] , y: m[a]): m[a] = 
         alt(x, y)
     
     pub def guard[m :# Type -> Type: Alternative](x: Bool): m[Unit] = 
-        if (x) point(()) else zero()
+        if (x) return(()) else zero()
 
     pub def asum[a, m :# Type -> Type : Alternative](xs: List[m[a]]): m[a] = 
         List.foldRight(alt, zero(), xs)
@@ -60,11 +60,11 @@ namespace Alternative {
 
     ///  One or none.
     pub def optional[a, m :# Type -> Type : Alternative](v: m[a]): m[Option[a]] = 
-        alt(Functor.map(x1 -> Some(x1), v), point(None))
+        alt(Functor.map(x1 -> Some(x1), v), return(None))
 
     
     pub def optionalWithDefault[a, m :# Type -> Type : Alternative](v: m[a], d: a): m[a] =         
-        alt(v, point(d))
+        alt(v, return(d))
 
     pub def choice[a, m :# Type -> Type: Alternative](xs: List[m[a]]): m[a] = 
         List.foldRight(alt, zero(), xs)
@@ -72,7 +72,7 @@ namespace Alternative {
     /// Warning - will crash unless the Alternative instance "shrinks" like Parser combinators
     /// that consume thier input.
     pub def many[a, m :# Type -> Type: Alternative](mx: m[a]): m[List[a]] = 
-        alt(many1(mx), point(Nil))
+        alt(many1(mx), return(Nil))
 
     /// Warning - will crash unless the Alternative instance "shrinks" like Parser combinators
     /// that consume thier input.
