@@ -68,6 +68,16 @@ namespace MonadLib/Monads {
     }
 
 
+    instance Functor[State[i]] { 
+        pub def map(f: a -> b & ef, x: State[i, a]): State[i, b] & ef = 
+            let State(f1) = x;
+            State(s -> {
+                let (s1, a) = f1(s); 
+                (s1, f(a)) as & Pure
+            }) as & ef
+    }
+
+
     instance Applicative[Id] { 
         pub def point(x: a): Id[a] = Id(x)
 
@@ -118,6 +128,19 @@ namespace MonadLib/Monads {
     }
 
 
+    instance Applicative[State[i]] { 
+        pub def point(x: a): State[i, a] = State(s -> (s, x))
+
+        pub def ap(f: State[i, a -> b & ef], x: State[i, a]): State[i, b] & ef = 
+            let State(f1) = f;
+            let State(x1) = x;
+            State(s -> {
+                let (s1, f) = f1(s);
+                let (s2, a) = x1(s1);
+                (s2, f(a)) as & Pure
+            }) as & ef
+    }
+
     instance Alternative[Exception[i]] with Monoid[i]{ 
         pub def zero(): Exception[i, a] = Exception(Err(Monoid.empty()))
 
@@ -159,9 +182,19 @@ namespace MonadLib/Monads {
             let Reader(x1) = x;
             Reader(r -> {
                 let a = x1(r);
-                k(a) as & Pure
+                let Reader(f) = k(a) as & Pure;
+                f(r) 
             }) as & ef
+    }
 
+    instance Monad[State[i]] { 
+        pub def bind(x: State[i, a], k: a -> State[i, b] & ef): State[i, b] & ef = 
+            let State(x1) = x;
+            State(s -> {
+                let (s1, a) = x1(s);
+                let State(f) = k(a) as & Pure;
+                f(s1) 
+            }) as & ef
     }
 
     /// Run functions
@@ -175,13 +208,30 @@ namespace MonadLib/Monads {
         x1
 
 
-    /// pub def runReader(r: i, x: Reader[ef, i, a]): a & ef = 
-    ///     let Reader(x1) = x;
-    ///     x1(r)
+    pub def runReader(x: Reader[i, a], r: i): a = 
+        let Reader(x1) = x;
+        x1(r)
 
     pub def runWriter(x: Writer[i, a]): (i, a) = 
         let Writer(x1) = x;
         x1
+
+    pub def execWriter(x: Writer[i, a]): i = 
+        let Writer(x1) = x;
+        fst(x1)
+
+
+    pub def runState(x: State[i, a], s: i): (i, a) = 
+        let State(x1) = x;
+        x1(s)
+
+    pub def execState(x: State[i, a], s: i): i = 
+        let State(x1) = x;
+        fst(x1(s))
+
+    pub def evalState(x: State[i, a], s: i): a = 
+        let State(x1) = x;
+        snd(x1(s))
 
 
 }
