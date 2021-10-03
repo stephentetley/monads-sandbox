@@ -76,7 +76,7 @@ namespace MonadLib/Reader {
 
     pub def flatMap(k: a -> Reader[i, b] & ef, mx: Reader[i, a]) : Reader[i, b] & ef = Monad.bind(mx, k)
 
-    pub def asks(f: i -> a & ef): Reader[i, a] & ef= 
+    pub def asks(f: i -> a & ef): Reader[i, a] & ef = 
         Reader(r1 -> f(r1) as & Pure) as & ef
 
     pub def runReader(x: Reader[i, a], r: i): a = 

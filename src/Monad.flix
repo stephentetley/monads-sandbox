@@ -15,6 +15,8 @@
  */
 
 
+/// This is a temporary module until the stdlib gets a Monad class.
+
 
 ///
 /// A type class for monads.
@@ -34,6 +36,7 @@ instance Monad[Option] {
     pub def bind(f: Option[a], k: a -> Option[b]): Option[b] = Option.flatMap(k, f)
 }
 
+/// Result has "wrong" arg order.
 
 namespace Monad {
     
@@ -103,6 +106,7 @@ namespace Monad {
     def chainl1Helper[a, m :# Type -> Type : Monad : Alternative](p: m[a], op: m[(a, a) -> a], x: a): m[a] = 
         alt(bind(op, f -> bind(p, v1 -> chainl1Helper(p, op, f(x, v1))))
             , return(x))
+
 
     pub def chainr1[a, m :# Type -> Type : Monad : Alternative](p: m[a], op: m[(a, a) -> a]): m[a] = 
         bind(p, v1 -> chainr1Helper(p, op, v1))
