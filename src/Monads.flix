@@ -18,7 +18,7 @@
 
 namespace MonadLib/Monads {
 
-    pub opaque type Id[a] = a
+    pub opaque type Id[a] with ToString = a
 
     pub opaque type Exception[i, a] = Result[a, i]
 
@@ -154,13 +154,13 @@ namespace MonadLib/Monads {
 
 
     instance Monad[Id] { 
-        pub def bind(x: Id[a], k: a -> Id[b] & ef): Id[b] & ef = 
+        pub def flatMap(k: a -> Id[b] & ef, x: Id[a]): Id[b] & ef = 
             let Id(x1) = x;
             k(x1)
     }
 
     instance Monad[Exception[i]] { 
-        pub def bind(x: Exception[i, a], k: a -> Exception[i, b] & ef): Exception[i, b] & ef = 
+        pub def flatMap(k: a -> Exception[i, b] & ef, x: Exception[i, a]): Exception[i, b] & ef = 
             let Exception(x1) = x;
             match x1 { 
                 case Ok(a) => k(a)
@@ -169,7 +169,7 @@ namespace MonadLib/Monads {
     }
 
     instance Monad[Writer[i]] with Monoid[i] { 
-        pub def bind(x: Writer[i, a], k: a -> Writer[i, b] & ef): Writer[i, b] & ef = 
+        pub def flatMap(k: a -> Writer[i, b] & ef, x: Writer[i, a]): Writer[i, b] & ef = 
             let Writer((w1, x1)) = x;
             let Writer((w2, b)) = k(x1);
             Writer((Monoid.combine(w1, w2), b))
@@ -178,7 +178,7 @@ namespace MonadLib/Monads {
 
 
     instance Monad[Reader[i]] { 
-        pub def bind(x: Reader[i, a], k: a -> Reader[i, b] & ef): Reader[i, b] & ef = 
+        pub def flatMap(k: a -> Reader[i, b] & ef, x: Reader[i, a]): Reader[i, b] & ef = 
             let Reader(x1) = x;
             Reader(r -> {
                 let a = x1(r);
@@ -188,7 +188,7 @@ namespace MonadLib/Monads {
     }
 
     instance Monad[State[i]] { 
-        pub def bind(x: State[i, a], k: a -> State[i, b] & ef): State[i, b] & ef = 
+        pub def flatMap(k: a -> State[i, b] & ef, x: State[i, a]): State[i, b] & ef = 
             let State(x1) = x;
             State(s -> {
                 let (s1, a) = x1(s);
@@ -196,6 +196,17 @@ namespace MonadLib/Monads {
                 f(s1) 
             }) as & ef
     }
+
+    /// For `flatMap` monads should be in their own namespaces...
+    /// pub def flatMapState(k: a -> State[i, b] & ef, x: State[i, a]): State[i, b] & ef = Monad.bind(x, k)
+
+
+    pub def tell(x: i): Writer[i, Unit] = Writer(x, ())
+
+    pub def get(): State[i, i] = State(s -> (s, s))
+
+    pub def put(x: i): State[i, Unit] = State(_ -> (x, ()))
+
 
     /// Run functions
 
