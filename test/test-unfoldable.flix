@@ -1,0 +1,23 @@
+
+
+def main(_args: Array[String]): Int32 & Impure = 
+    println("Running...");
+    test01();
+    0
+
+def test01(): Unit & Impure = 
+    let xs: List[Int32] = Unfoldable.unfold(s -> if (s > 10) None else Some(s, s+1), 1);
+    xs |> println;
+    let c1: Chain[Int32] = Unfoldable.unfold(s -> if (s > 10) None else Some(s, s+1), 1);
+    c1 |> println;
+    let c2: Chain[Int32] = Unfoldable.replicate(10, 1);
+    c2 |> println;
+    let c3: Chain[Int32] = Unfoldable.none();
+    c3 |> println;
+    let c4: Chain[Int32] = Unfoldable.singleton(100);
+    c4 |> println;
+    let c5: Chain[Int32] = Unfoldable.fromOption(None);
+    c5 |> println;
+    let c6: Chain[Int32] = Unfoldable.fromOption(Some(0));
+    c6 |> println;
+    ()

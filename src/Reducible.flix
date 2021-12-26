@@ -32,6 +32,23 @@ pub lawless class Reducible[t : Type -> Type] with Foldable[t] {
     pub def reduceMap(f: a -> b, t: t[a]): b with SemiGroup[b] =
         Reducible.reduceLeftTo(f, (b, a) -> SemiGroup.combine(b, f(a)), t)
 
+    pub def minimum(t: t[a]): a with Order[a] =
+        Reducible.reduceLeft(Order.min, t)
+
+    pub def minimumBy(cmp: (a, a) -> Comparison, t: t[a]): a with Order[a] =
+        Reducible.reduceLeft(Order.minBy(cmp), t)
+
+    pub def maximum(t: t[a]): a with Order[a] =
+        Reducible.reduceLeft(Order.max, t)
+
+    pub def maximumBy(cmp: (a, a) -> Comparison, t: t[a]): a with Order[a] =
+        Reducible.reduceLeft(Order.maxBy(cmp), t)
+
+    ///
+    /// Returns `t` as an non-empty list.
+    ///
+    pub def toNel(t: t[a]): Nel[a] =
+        Reducible.reduceRightTo(Nel.singleton, Nel.cons, t)
 
 }
 
@@ -54,6 +71,8 @@ instance Reducible[Nel] {
     pub override def reduceLeft(f: (a, a) -> a & ef, l: Nel[a]): a & ef = Nel.reduceLeft(f, l)
 
     pub override def reduceRight(f: (a, a) -> a & ef, l: Nel[a]): a & ef = Nel.reduceRight(f, l)
+
+    pub override def toNel(t: Nel[a]): Nel[a] = t
 }
 
 namespace Reducible {
