@@ -48,37 +48,28 @@ namespace Alternative {
     use Applicative.{<&>, return, consA};
     use Alternative.{alt, zero};
 
-    pub def <|>[a, m :# Type -> Type : Alternative](x: m[a] , y: m[a]): m[a] = 
+    pub def <|>(x: m[a] , y: m[a]): m[a] with Alternative[m] = 
         alt(x, y)
     
-    pub def guard[m :# Type -> Type: Alternative](x: Bool): m[Unit] = 
+    pub def guard(x: Bool): m[Unit] with Alternative[m] = 
         if (x) return(()) else zero()
 
-    pub def asum[a, m :# Type -> Type : Alternative](xs: List[m[a]]): m[a] = 
+    /// `foldLeft` or `foldRight`?
+    pub def asum(xs: List[m[a]]): m[a] with Alternative[m] = 
         List.foldRight(alt, zero(), xs)
 
 
     ///  One or none.
-    pub def optional[a, m :# Type -> Type : Alternative](v: m[a]): m[Option[a]] = 
-        alt(Functor.map(x1 -> Some(x1), v), return(None))
+    pub def optional(x: m[a]): m[Option[a]] with Alternative[m] =
+        alt(Functor.map(x1 -> Some(x1), x), point(None))
 
-    
-    pub def optionalWithDefault[a, m :# Type -> Type : Alternative](v: m[a], d: a): m[a] =         
-        alt(v, return(d))
+    pub def withDefault(v: m[a], d: a): m[a] with Alternative[m] =
+        alt(v, point(d))
 
+/*
     pub def choice[a, m :# Type -> Type: Alternative](xs: List[m[a]]): m[a] = 
         List.foldRight(alt, zero(), xs)
 
-    /// Warning - will crash unless the Alternative instance "shrinks" like Parser combinators
-    /// that consume thier input.
-    pub def many[a, m :# Type -> Type: Alternative](mx: m[a]): m[List[a]] = 
-        alt(many1(mx), return(Nil))
-
-    /// Warning - will crash unless the Alternative instance "shrinks" like Parser combinators
-    /// that consume thier input.
-    pub def many1[a, m :# Type -> Type: Alternative](mx: m[a]): m[List[a]] = 
-        consA(mx, many(mx))
-
-
+*/
 
 }

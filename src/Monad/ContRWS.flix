@@ -16,7 +16,7 @@
 
 
 
-namespace MonadLib/ContRWS {
+namespace MonadLib/Monad/ContRWS {
 
     ///
     /// ContRWS is the Reader-Writer-State monad implemented in CPS. 

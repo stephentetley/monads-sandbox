@@ -17,13 +17,9 @@
 
 
 
-namespace ApplicativeTemp {
+namespace ApplicativeExtras {
 
     use Applicative.{point};
-
-    /// For Functor ...
-    pub def ignore(mx: m[a]): m[Unit] with Functor[m] =
-        Functor.map(constant(), mx)
 
 
     // Haskell's <$>
@@ -65,17 +61,11 @@ namespace ApplicativeTemp {
         seqLeft((seqRight(start, mx)), end)
 
 
-    pub def whenTrue(test: Bool, ma: m[a]): m[Option[a]] with Applicative[m] = 
-        match test { 
-            case true => Functor.map(Some, ma)
-            case false => point(None)
-        }
+    pub def whenTrue(x: Bool, f: m[Unit]): m[Unit] with Applicative[m] =
+        if (x) f else point(())
 
-    pub def whenFalse(test: Bool, ma: m[a]): m[Option[a]] with Applicative[m] = 
-        match test { 
-            case true => point(None)
-            case false => Functor.map(Some, ma)
-        }
+    pub def whenFalse(x: Bool, f: m[Unit]): m[Unit] with Applicative[m] =
+        if (not x) f else point(())
 
     /// pub def whenSome[a, b, m :# Type -> Type : Applicative](x: Option[a], f: a -> m[b]): m[Option[b]] = 
     ///     match x { 
@@ -98,14 +88,21 @@ namespace ApplicativeTemp {
         else 
             replicateAHelper(ntimes - 1, mx, consA(mx, ac))
 
-    pub def replicateX(ntimes: Int32, mx: m[a]): m[Unit] with Applicative[m] = 
-        replicateXHelper(ntimes, mx, point(()))
 
-    def replicateXHelper(ntimes: Int32, mx: m[a], ac: m[Unit]): m[Unit] with Applicative[m] = 
-        if (ntimes <= 0)
+    /// aka `replicateM_`
+    pub def ntimes(i: Int32, mx: m[a]): m[Unit] with Applicative[m] =
+        ntimesHelper(i, mx, point(()))
+
+    /// Helper for `ntimes`.
+    ///
+    /// Must ensure that `mx` is evaluated at each step and the function is tail recursive,
+    /// so we use an accumulator (even though it doesn't change).
+    ///
+    def ntimesHelper(i: Int32, mx: m[a], ac: m[Unit]): m[Unit] with Applicative[m] =
+        if (i <= 0)
             ac
-        else 
-            replicateXHelper(ntimes - 1, mx, ignore(mx))
+        else
+            ntimesHelper(i - 1, mx, Applicative.productLeft(ac, mx))
 
 /*
 

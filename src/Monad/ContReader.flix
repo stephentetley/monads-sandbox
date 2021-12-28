@@ -16,7 +16,7 @@
 
 
 
-namespace MonadLib/ContReader {
+namespace MonadLib/Monad/ContReader {
 
     ///
     /// ContReader is the Reader monad implemented in CPS. 

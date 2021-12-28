@@ -16,7 +16,7 @@
 
 
 
-namespace MonadLib/ContState {
+namespace MonadLib/Monad/ContState {
 
     ///
     /// ContState is the State monad implemented in CPS. 

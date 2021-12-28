@@ -16,7 +16,7 @@
 
 
 
-namespace MonadLib/ContWriter {
+namespace MonadLib/Monad/ContWriter {
 
     ///
     /// ContWriter is the Writer monad implemented in CPS. 

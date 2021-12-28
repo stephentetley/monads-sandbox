@@ -15,13 +15,10 @@
  */
 
 
-/// This is a temporary module until the stdlib gets a Monad class.
-
-
 
 /// Result has "wrong" arg order.
 
-namespace MonadTemp {
+namespace MonadExtras {
     
     use Applicative.{point};
     use Alternative.{alt, zero};
@@ -52,11 +49,17 @@ namespace MonadTemp {
     pub def <=<(f1: b -> m[c] & ef, f2: a -> m[b] & ef): a -> m[c] & ef with Monad[m] = x -> 
         kleisliRight(f1, f2, x)
 
-    pub def whenTrueM(test: m[Bool], ma: m[a]): m[Option[a]] with Monad[m] = 
-        bind(test, x -> ApplicativeTemp.whenTrue(x, ma))
 
-    pub def whenFalseM(test: m[Bool], ma: m[a]): m[Option[a]] with Monad[m] = 
-        bind(test, x -> ApplicativeTemp.whenFalse(x, ma))
+    pub def ifM(test: m[Bool], mthen: m[a], melse: m[a]): m[a] with Monad[m] =
+        flatMap(x1 -> if (x1) mthen else melse, test)
+    
+    pub def whenTrueM(x: m[Bool], f: m[Unit]): m[Unit] with Monad[m] =
+        flatMap(x1 -> if (x1) f else point(()), x)
+
+
+    pub def whenFalseM(x: m[Bool], f: m[Unit]): m[Unit] with Monad[m] =
+        flatMap(x1 -> if (not x1) f else point(()), x)
+
 
     pub def mfilter(f: a -> Bool, mx: m[a]): m[a] with Alternative[m], Monad[m] = 
         bind(mx, x -> if (f(x)) point(x) else zero())
@@ -81,31 +84,35 @@ namespace MonadTemp {
     }
 
 
-/*
-    /// Chains
+    /// Chains are too "special case" for adding to the Monad namespace.
+    /// But they are complicated to define and more general than being tied
+    /// to a specific parser combinator library...
+    /// Where should they go?
+    /// [Also note - chains might be a headache for a strict language...]
+    pub def chainLeft(p: m[a], op: m[(a, a) -> a], x: a): m[a] with Alternative[m], Monad[m] =
+        Alternative.alt(chainLeft1(p,op), Applicative.point(x))
 
-    pub def chainl[a, m :# Type -> Type : Monad : Alternative](p: m[a], op: m[(a, a) -> a], x: a): m[a] = 
-        alt(chainl1(p,op), point(x))
+    pub def chainLeft1(p: m[a], op: m[(a, a) -> a]): m[a] with Alternative[m], Monad[m] =
+        flatMap(v1 -> chainLeft1Helper(p, op, v1), p)
 
-    pub def chainl1[a, m :# Type -> Type : Monad : Alternative](p: m[a], op: m[(a, a) -> a]): m[a] = 
-        bind(p, v1 -> chainl1Helper(p, op, v1))
-        
-    def chainl1Helper[a, m :# Type -> Type : Monad : Alternative](p: m[a], op: m[(a, a) -> a], x: a): m[a] = 
-        alt(bind(op, f -> bind(p, v1 -> chainl1Helper(p, op, f(x, v1))))
-            , point(x))
+    def chainLeft1Helper(p: m[a], op: m[(a, a) -> a], x: a): m[a] with Alternative[m], Monad[m] =
+        alt(flatMap(f -> flatMap(v1 -> chainLeft1Helper(p, op, f(x, v1)), p), op)
+           , point(x))
 
 
-    pub def chainr1[a, m :# Type -> Type : Monad : Alternative](p: m[a], op: m[(a, a) -> a]): m[a] = 
-        bind(p, v1 -> chainr1Helper(p, op, v1))
-    
-    def chainr1Helper[a, m :# Type -> Type : Monad : Alternative](p: m[a], op: m[(a, a) -> a], x: a): m[a] = 
-        alt(chainr1Step(p, op, x), point(x))
 
-    def chainr1Step[a, m :# Type -> Type : Monad : Alternative](p: m[a], op: m[(a, a) ->a], x: a): m[a] = 
-        bind(op, f -> 
-            bind(bind(p, v1 -> chainr1Helper(p, op, v1)), y -> 
-                bind(chainr1Helper(p,op, f(x,y)), ans -> point(ans))))
+    pub def chainRight(p: m[a], op: m[(a, a) -> a], x: a): m[a] with Alternative[m], Monad[m] =
+        alt(chainRight1(p, op), point(x))
 
-*/
+
+    pub def chainRight1(p: m[a], op: m[(a, a) -> a]): m[a] with Alternative[m], Monad[m] =
+        flatMap(v1 -> chainRight1Helper(p, op, v1), p)
+
+    def chainRight1Helper(p: m[a], op: m[(a, a) -> a], x: a): m[a] with Alternative[m], Monad[m] =
+        alt(chainRight1Step(p, op, x), point(x))
+
+    def chainRight1Step(p: m[a], op: m[(a, a) -> a], x: a): m[a] with Alternative[m], Monad[m] =
+        flatMap(f ->
+            flatMap(y -> flatMap(point, chainRight1Helper(p,op, f(x,y))), flatMap(v1 -> chainRight1Helper(p, op, v1), p)), op)
 
 }
