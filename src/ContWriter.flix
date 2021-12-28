@@ -44,7 +44,7 @@ namespace MonadLib/ContWriter {
         f(cont)
 
     ///
-    /// Returns the result of applying `ma`.
+    /// Returns just the "output" of `ma`.
     ///
     pub def execContWriter(ma: ContWriter[w, w, a]): w & Impure =
         let ContWriter(f) = ma;
