@@ -27,14 +27,14 @@ namespace MonadLib/ContState {
     /// We use an Impure continuation so we can internally cast the `ef` of operations and not lose
     /// impurity information.
     ///
-    opaque type ContState[ka, s, a] = (a -> s -> ka & Impure) -> s -> ka & Impure
+    opaque type ContState[ka, s, a] = s -> (a -> s -> ka & Impure) -> ka & Impure
 
     ///
     /// Helper function for ContState's implementations of `map` and `ap`.
     ///
     def apply1(ma: ContState[ka, s, a], st: s, k: a -> s -> ka & Impure): ka & Impure =
         let ContState(f) = ma;
-        f(k, st)
+        f(st, k)
 
     ///
     /// Returns the result (new state and answer) of applying `ma` to the initial state `st`.
@@ -42,22 +42,22 @@ namespace MonadLib/ContState {
     pub def runContState(ma: ContState[(s, a), s, a], st: s): (s, a) & Impure =
         let ContState(f) = ma;
         let cont = (a, s) -> (s, a) as & Impure;
-        f(cont, st)
+        f(st, cont)
 
 
     instance Functor[ContState[ka, s]] {
         pub def map(f: a -> b & ef, ma: ContState[ka, s, a]): ContState[ka, s, b] & ef =
-            ContState((k, s) ->
+            ContState((s, k) ->
                 apply1(ma, s, (a, s1) -> k(f(a) as & Impure, s1))
             ) as & ef
     }
 
     instance Applicative[ContState[ka, s]] {
         pub def point(x: a): ContState[ka, s, a] =
-            ContState((k, s) -> k(x, s))
+            ContState((s, k) -> k(x, s))
 
         pub def ap(mf: ContState[ka, s, a -> b & ef], ma: ContState[ka, s, a]): ContState[ka, s, b] & ef =
-            ContState((k, s) ->
+            ContState((s, k) ->
                 apply1(mf, s, (f, s1) ->
                     apply1(ma, s1, (a, s2) ->
                         k(f(a) as & Impure, s2)))
@@ -66,7 +66,7 @@ namespace MonadLib/ContState {
 
     instance Monad[ContState[ka, s]] {
         pub def flatMap(f: a -> ContState[ka, s, b] & ef, ma: ContState[ka, s, a]): ContState[ka, s, b] & ef =
-            ContState((k, s) ->
+            ContState((s, k) ->
                 apply1(ma, s, (a, s1) ->
                     apply1(f(a) as & Impure, s1, (b, s2) ->
                         k(b, s2)))
@@ -76,22 +76,22 @@ namespace MonadLib/ContState {
     /// update is tricky, we must update the state for the rest of the computation, are we sure this works...
 
     pub def update(f: s -> s & ef): ContState[ka, s, Unit] & ef = 
-        ContState((k, s) -> 
+        ContState((s, k) -> 
             k((), f(s) as & Impure)
         ) as & ef
 
     pub def put(st: s): ContState[ka, s, Unit] = 
-        ContState((k, _) -> 
+        ContState((_, k) -> 
             k((), st)
         )
 
     pub def get(): ContState[ka, s, s] = 
-        ContState((k, s) -> 
+        ContState((s, k) -> 
             k(s, s)
         )
 
     pub def gets(proj: s -> a & ef): ContState[ka, s, a] & ef = 
-        ContState((k, s) -> 
+        ContState((s, k) -> 
             k(proj(s) as & Impure, s)
         ) as & ef
 
