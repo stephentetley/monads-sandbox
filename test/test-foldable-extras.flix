@@ -8,15 +8,15 @@ def main(_args: Array[String]): Int32 & Impure =
     0
 
 def test01(): Unit & Impure =     
-    let l = 1 :: 2 :: 3 :: 4 :: Nil;
+    let xs = 1 :: 2 :: 3 :: 4 :: Nil;
     println("foreachM");
-    runContWriter(FoldableExtras.foreachM(Chain.singleton >> tell, l)) |> println;
+    runContWriter(FoldableExtras.foreachM(Chain.singleton >> tell, xs)) |> println;
 
     println("foldLeftM");
-    runContWriter(FoldableExtras.foldLeftM(foldStep, 0, l)) |> println;
+    runContWriter(FoldableExtras.foldLeftM(foldStep, 0, xs)) |> println;
 
     println("foldRightM");
-    runContWriter(FoldableExtras.foldRightM(flip(foldStep), 0, l)) |> println;
+    runContWriter(FoldableExtras.foldRightM(flip(foldStep), 0, xs)) |> println;
     ()
 
 

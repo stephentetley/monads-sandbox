@@ -17,7 +17,7 @@
 
 namespace FoldableExtras {
 
-    use ApplicativeExtras.{*>};
+    use Applicative.{*>};
 
 
     pub def foldLeftM(f: (b, a) -> m[b], s: b, t: t[a]): m[b] with Foldable[t], Monad[m] =

@@ -20,45 +20,20 @@
 namespace ApplicativeExtras {
 
     use Applicative.{point};
+    use Functor.{<$>};
+    use Applicative.{<*>, <*, *>};
 
-
-    // Haskell's <$>
-    pub def <&>(f: a -> b & ef, mx: m[a]): m[b] & ef with Functor[m] =
-        Functor.map(f, mx)
-
-    pub def <&(x: a, mx: m[b]): m[a] with Functor[m] =
-        Functor.map(_ -> x, mx)
 
     /// Applicative functions...
 
 
     ///  Applicative cons.
     pub def consA(f: m[a], fs: m[List[a]]): m[List[a]] with Applicative[m] =
-        (((x, xs) -> x :: xs) <&> f) <*> fs
-
-    // Haskell's <*> (i.e `ap`)
-    pub def <*>(f: m[a -> b & ef], mx: m[a]): m[b] & ef with Applicative[m] =
-        Applicative.ap(f, mx)
-
-    pub def <**>(mx: m[a], f: m[a -> b & ef]): m[b] & ef with Applicative[m] =
-        Applicative.ap(f, mx)
-
-    pub def seqLeft(mx: m[a], my: m[b]): m[a] with Applicative[m] = 
-        (((x1, _) -> x1) <&> mx) <*> my
-
-    pub def seqRight(mx: m[a], my: m[b]): m[b] with Applicative[m] = 
-        (((_, x2) -> x2) <&> mx) <*> my
-
-
-    /// Alias for `seqLeft`
-    pub def <*(mx: m[a], my: m[b]): m[a] with Applicative[m] = seqLeft(mx, my)
-
-    /// Alias for `seqRight`
-    pub def *>(mx: m[a], my: m[b]): m[b] with Applicative[m] = seqRight(mx, my)
+        (((x, xs) -> x :: xs) <$> f) <*> fs
 
 
     pub def between(start: m[o], end: m[c], mx: m[a]): m[a] with Applicative[m] = 
-        seqLeft((seqRight(start, mx)), end)
+        (start *> mx) <* end
 
 
     pub def whenTrue(x: Bool, f: m[Unit]): m[Unit] with Applicative[m] =

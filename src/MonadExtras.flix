@@ -27,28 +27,6 @@ namespace MonadExtras {
     pub def bind(x: m[a], k: a -> m[b] & ef): m[b] & ef with Monad[m] = Monad.flatMap(k, x)
 
 
-    pub def >>=(x: m[a], k: a -> m[b] & ef): m[b] & ef with Monad[m] =
-        bind(x, k)
-
-    pub def =<<(k: a -> m[b] & ef, x: m[a]): m[b] & ef with Monad[m] =
-        bind(x, k)
-
-
-    pub def kleisliLeft(f1: a -> m[b] & ef, f2: b -> m[c] & ef): a -> m[c] & ef with Monad[m] = x ->
-        bind(f1(x), x1 -> f2(x1))
-
-
-    pub def kleisliRight(f1: b -> m[c] & ef, f2: a -> m[b] & ef): a -> m[c] & ef with Monad[m] = x -> 
-        bind(f2(x), x1 -> f1(x1))      
-    
-    /// Alias for `kleisliLeft`
-    pub def >=>(f1: a -> m[b] & ef, f2: b -> m[c] & ef): a -> m[c]  & ef with Monad[m] = x ->
-        kleisliLeft(f1, f2, x)
-
-    /// Alias for `kleisliRight`
-    pub def <=<(f1: b -> m[c] & ef, f2: a -> m[b] & ef): a -> m[c] & ef with Monad[m] = x -> 
-        kleisliRight(f1, f2, x)
-
 
     pub def ifM(test: m[Bool], mthen: m[a], melse: m[a]): m[a] with Monad[m] =
         flatMap(x1 -> if (x1) mthen else melse, test)
@@ -62,7 +40,7 @@ namespace MonadExtras {
 
 
     pub def mfilter(f: a -> Bool, mx: m[a]): m[a] with Alternative[m], Monad[m] = 
-        bind(mx, x -> if (f(x)) point(x) else zero())
+        flatMap(x -> if (f(x)) point(x) else zero(), mx)
 
     pub def foldLeftM(f: (b, a) -> m[b], s: b, xs: List[a]): m[b] with Monad[m] = 
         foldLeftMHelper(f, point(s), xs)
