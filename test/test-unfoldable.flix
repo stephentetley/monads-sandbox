@@ -20,4 +20,11 @@ def test01(): Unit & Impure =
     c5 |> println;
     let c6: Chain[Int32] = Unfoldable.fromOption(Some(0));
     c6 |> println;
+    let a1 = ref 0;
+    let c7: Chain[Int32] = Unfoldable.unfoldWithIter(_ -> {let ans = deref a1; a1 := deref a1 + 1; if (ans > 4) None else Some(ans)});
+    c7 |> println;
+    let o1: Option[Char] = Unfoldable.replicate(10, 'b');
+    o1 |> println;
+    let o2: Option[Char] = Unfoldable.singleton('b');
+    o2 |> println;
     ()

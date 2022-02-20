@@ -18,6 +18,12 @@ pub lawless class Bifunctor[f: Type -> Type -> Type] {
 
     pub def bimap(f: a -> c & ef1, g: b -> d & ef2, x: f[a, b]): f[c, d] & (ef1 and ef2)
 
+    pub def lmap(f: a -> c & ef, x: f[a, b]): f[c, b] & ef with Bifunctor[f] = 
+        Bifunctor.bimap(f, identity, x)
+
+    pub def rmap(f: b -> d & ef, x: f[a, b]): f[a, d] & ef with Bifunctor[f] = 
+        Bifunctor.bimap(identity, f, x)
+
 }
 
 
@@ -32,10 +38,5 @@ instance Bifunctor[Result] {
 
 namespace Bifunctor {
     
-    pub def lmap(f: a -> c & ef, x: f[a, b]): f[c, b] & ef with Bifunctor[f] = 
-        Bifunctor.bimap(f, identity, x)
-
-    pub def rmap(f: b -> d & ef, x: f[a, b]): f[a, d] & ef with Bifunctor[f] = 
-        Bifunctor.bimap(identity, f, x)
 
 }

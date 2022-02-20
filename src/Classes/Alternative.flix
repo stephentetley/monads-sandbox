@@ -16,27 +16,38 @@
 
 
 
+
 ///
 /// A type class for moniodal applicative functors biased to "choice" / "alternative".
 ///
-pub lawless class Alternative[m :# Type -> Type] with Applicative[m] {
-
-    pub def zero(): m[a]
+pub lawless class Alt[m: Type -> Type] with Applicative[m] {
 
     pub def alt(x: m[a], y: m[a]): m[a] 
 
+
 }
 
+
+///
+/// A type class for moniodal applicative functors biased to "choice" / "alternative".
+///
+pub lawless class Alternative[m: Type -> Type] with Alt[m] {
+
+    pub def zero(): m[a]
+
+    pub def alt(x: m[a], y: m[a]): m[a] = Alt.alt(x, y)
+
+}
+
+instance Alt[List] {
+    pub def alt(x: List[a] , y: List[a]): List[a] = List.append(x,y)
+}
 
 instance Alternative[List] {
     pub def zero(): List[a] = Nil
-
-    pub def alt(x: List[a] , y: List[a]): List[a] = List.append(x,y)
 }
-    
-instance Alternative[Option] { 
-    pub def zero(): Option[a] = None
 
+instance Alt[Option] { 
     pub def alt(x: Option[a], y: Option[a]): Option[a] = 
         match x { 
             case Some(x1) => Some(x1)
@@ -44,19 +55,24 @@ instance Alternative[Option] {
         }
 }
 
+
+instance Alternative[Option] { 
+    pub def zero(): Option[a] = None
+}
+
 namespace Alternative {
-    use Applicative.{<&>, return, consA};
+    use Applicative.{<&>, point};
     use Alternative.{alt, zero};
 
     pub def <|>(x: m[a] , y: m[a]): m[a] with Alternative[m] = 
         alt(x, y)
     
     pub def guard(x: Bool): m[Unit] with Alternative[m] = 
-        if (x) return(()) else zero()
+        if (x) point(()) else zero()
 
     /// `foldLeft` or `foldRight`?
-    pub def asum(xs: List[m[a]]): m[a] with Alternative[m] = 
-        List.foldRight(alt, zero(), xs)
+    pub def asum(xs: t[m[a]]): m[a] with Alternative[m], Foldable[t] = 
+        Foldable.foldRight(alt, zero(), xs)
 
 
     ///  One or none.
