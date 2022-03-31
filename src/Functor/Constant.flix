@@ -18,7 +18,7 @@
 /// The Constant functor.
 ///
 
-pub enum Constant[a, b] with Eq, Order, Hash, ToString {
+pub enum Constant[a, _b] with Eq, Order, Hash, ToString {
     case Constant(a)
 }
 

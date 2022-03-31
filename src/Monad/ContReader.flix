@@ -24,7 +24,7 @@ namespace MonadLib/Monad/ContReader {
     /// We use an Impure continuation so we can internally cast the `ef` of operations and not lose
     /// impurity information.
     ///
-    opaque type ContReader[ka, r, a] = r -> (a -> ka & Impure) -> ka & Impure
+    pub opaque type ContReader[ka, r, a] = r -> (a -> ka & Impure) -> ka & Impure
 
     ///
     /// Helper function for ContReader's implementations of `map` and `ap`.
@@ -81,21 +81,13 @@ namespace MonadLib/Monad/ContReader {
         ) as & ef
 
 
-/*
-    /// update is tricky, we must update the state for the rest of the computation, are we sure this works...
+    /// `local` is untested...
 
 
-    pub def put(st: s): ContReader[ka, s, Unit] = 
-        ContReader((k, _) -> 
-            k((), st)
-        )
-
-
-    pub def gets(proj: s -> a & ef): ContReader[ka, s, a] & ef = 
-        ContReader((k, s) -> 
-            k(proj(s) as & Impure, s)
+    pub def local(f: r -> r, ma: ContReader[ka, r, a]): ContReader[ka, r, a] & ef = 
+        ContReader((r, k) -> 
+            apply1(ma, f(r), a1 -> 
+                k(a1))
         ) as & ef
-
-*/
 
 }

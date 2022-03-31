@@ -75,7 +75,7 @@ namespace FoldableExtras {
 
     def unlinesHelper(t: t[String]): String & Impure with Foldable[t] =
         let sb = StringBuilder.new();
-        Foldable.foldLeft((_, x) -> StringBuilder.appendLine!(sb, x), (), t);
+        Foldable.foldLeft((_, x) -> StringBuilder.appendLine!(x, sb), (), t);
         StringBuilder.toString(sb)
 
     /// `String.unwords` generalized to any Foldable `t[String]`.
@@ -85,9 +85,9 @@ namespace FoldableExtras {
         let sb = StringBuilder.new();
         let step = (n, x) ->
             if (n < 1)
-                {StringBuilder.appendString!(sb, x); n + 1}
+                {StringBuilder.appendString!(x, sb); n + 1}
             else
-                {StringBuilder.appendChar!(sb, ' '); StringBuilder.appendString!(sb, x); n + 1};
+                {StringBuilder.append!(' ', sb); StringBuilder.appendString!(x, sb); n + 1};
         Foldable.foldLeft(step, 0, t);
         StringBuilder.toString(sb)
 

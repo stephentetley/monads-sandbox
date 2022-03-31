@@ -141,16 +141,16 @@ namespace MonadLib/Monads {
             }) as & ef
     }
 
-    instance Alternative[Exception[i]] with Monoid[i]{ 
-        pub def zero(): Exception[i, a] = Exception(Err(Monoid.empty()))
+    /// instance Alternative[Exception[i]] with Monoid[i]{ 
+    ///     pub def zero(): Exception[i, a] = Exception(Err(Monoid.empty()))
 
-        pub def alt(x: Exception[i, a], y: Exception[i, a]): Exception[i, a] =
-            let Exception(x1) = x;
-            match x1 { 
-                case Ok(a1) => Exception(Ok(a1))
-                case Err(_) => y
-            }
-    }
+    ///     pub def alt(x: Exception[i, a], y: Exception[i, a]): Exception[i, a] =
+    ///         let Exception(x1) = x;
+    ///         match x1 { 
+    ///             case Ok(a1) => Exception(Ok(a1))
+    ///             case Err(_) => y
+    ///         }
+    /// }
 
 
     instance Monad[Id] { 

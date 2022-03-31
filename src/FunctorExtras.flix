@@ -14,16 +14,6 @@
  * limitations under the License.
  */
 
-instance Functor[RedBlackTree.RedBlackTree[k]] {
-    pub def map(f: v1 -> v2 & ef, tree: RedBlackTree.RedBlackTree[k, v1]): RedBlackTree.RedBlackTree[k, v2] & ef =
-        RedBlackTree.mapWithKey((_, v) -> f(v), tree)
-}
-
-instance Functor[Map[k]] {
-    pub def map(f: v1 -> v2 & ef, m: Map[k, v1]): Map[k, v2] & ef =
-        let Map(tree) = m;
-        Map(RedBlackTree.mapWithKey((_, v) -> f(v), tree))
-}
 
 
 namespace FunctorExtras {

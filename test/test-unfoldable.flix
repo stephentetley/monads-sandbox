@@ -1,10 +1,7 @@
 
+namespace TestUnfoldable {
 
-def main(_args: Array[String]): Int32 & Impure = 
-    println("Running...");
-    test01();
-    0
-
+@test
 def test01(): Unit & Impure = 
     let xs: List[Int32] = Unfoldable.unfold(s -> if (s > 10) None else Some(s, s+1), 1);
     xs |> println;
@@ -28,3 +25,5 @@ def test01(): Unit & Impure =
     let o2: Option[Char] = Unfoldable.singleton('b');
     o2 |> println;
     ()
+
+}    

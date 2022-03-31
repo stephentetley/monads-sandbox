@@ -42,6 +42,9 @@ pub lawless class Many[m : Type -> Type] with Alternative[m] {
 
 namespace Many {
 
+    use Functor.{<$>};
+    use Applicative.{<*>, <*, *>};
+
     ///
     /// Zero or more
     ///
@@ -70,52 +73,44 @@ namespace Many {
 
     /// many seperated and ended by sep
     pub def endBy(ma: m[a], sep: m[sep]): m[List[a]] with Many[m] =
-        many(ApplicativeExtras.seqLeft(ma, sep))
+        many(ma <* sep)
 
     /// many1 seperated and ended by sep
     pub def endBy1(ma: m[a], sep: m[sep]): m[List[a]] with Many[m] =
-        many1(ApplicativeExtras.seqLeft(ma, sep))
+        many1(ma <* sep)
 
     pub def manyTill(ma: m[a], stop: m[end]): m[List[a]] with Many[m] =
-        ApplicativeExtras.seqLeft(many(ma), stop)
+        many(ma) <* stop
 
     pub def manyTill1(ma: m[a], stop: m[end]): m[List[a]] with Many[m] =
-        ApplicativeExtras.seqLeft(many1(ma), stop)
+        many1(ma) <* stop
 
     pub def skipManyTill(ma: m[a], stop: m[end]): m[Unit] with Many[m]  =
-        ApplicativeExtras.seqLeft(skipMany(ma), stop)
+        skipMany(ma) <* stop
 
     pub def skipManyTill1(ma: m[a], stop: m[end]): m[Unit] with Many[m]  =
-        ApplicativeExtras.seqLeft(skipMany1(ma), stop)
+        skipMany1(ma) <* stop
 
 
     pub def sepBy(ma: m[a], sep: m[end]): m[List[a]] with Many[m] =
         Alternative.alt(sepBy1(ma, sep), Applicative.point(Nil))
 
     pub def sepBy1(ma: m[a], sep: m[end]): m[List[a]] with Many[m] =
-        use ApplicativeExtras.{<*>, *>};
-        use FunctorExtras.{<&>};
-        (((h, tl) -> h :: tl) <&> ma) <*> many(sep *> ma)
+        (((h, tl) -> h :: tl) <$> ma) <*> many(sep *> ma)
 
     pub def sepEndBy(ma: m[a], sep: m[end]): m[List[a]] with Many[m] =
         Alternative.alt(sepEndBy1(ma, sep), Applicative.point(Nil))
 
     pub def sepEndBy1(ma: m[a], sep: m[end]): m[List[a]] with Many[m] =
-        use ApplicativeExtras.{<*>, *>};
-        use FunctorExtras.{<&>};
-        ((((h, tl, _) -> h :: tl) <&> ma) <*> many(sep *> ma)) <*> Alternative.optional(sep)
+        ((((h, tl, _) -> h :: tl) <$> ma) <*> many(sep *> ma)) <*> Alternative.optional(sep)
 
 
     /// The prefix `m1` must succeed, `m2` runs zero-or-more times.
     pub def prefixMany(m1: m[a], m2: m[a]): m[List[a]] with Many[m] =
-        use ApplicativeExtras.{<*>, *>};
-        use FunctorExtras.{<&>};
-        (((h, tl) -> h :: tl) <&> m1) <*> many(m2)
+        (((h, tl) -> h :: tl) <$> m1) <*> many(m2)
 
     /// The prefix `m1` must succeed, `m2` runs one-or-more times.
     pub def prefixMany1(m1: m[a], m2: m[a]): m[List[a]] with Many[m] =
-        use ApplicativeExtras.{<*>, *>};
-        use FunctorExtras.{<&>};
-        (((h, tl) -> h :: tl) <&> m1) <*> many1(m2)
+        (((h, tl) -> h :: tl) <$> m1) <*> many1(m2)
 
 }

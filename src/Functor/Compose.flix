@@ -26,11 +26,13 @@ pub enum Compose[f : Type -> Type, g : Type -> Type, a : Type] {
     case Compose(f[g[a]])
 }
 
+/*
 instance Eq[Compose[f, g, a]] with Eq[a], Eq[f[a]], Eq[g[a]] {
     pub def eq(x: Compose[f, g, a], y: Compose[f, g, a]): Bool = match (x, y) {
         case (Compose(x1), Compose(y1)) => a -> x1(a) == y1(a)
     }
 }
+*/
 
 instance Functor[Compose[f, g]] with Functor[f], Functor[g] {
     pub def map(f: a -> b & ef, x: Compose[f, g, a]): Compose[f, g, b] & ef =
