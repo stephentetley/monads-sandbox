@@ -18,13 +18,15 @@
 
 namespace MonadLib/Monad/ContRWS {
 
+
+
     ///
     /// ContRWS is the Reader-Writer-State monad implemented in CPS. 
     ///
     /// We use an Impure continuation so we can internally cast the `ef` of operations and not lose
     /// impurity information.
     ///
-    opaque type ContRWS[ka, r, w, s, a] = r -> s -> w -> (a -> s -> w -> ka & Impure) -> ka & Impure
+    pub opaque type ContRWS[ka, r, w, s, a] = r -> s -> w -> (a -> s -> w -> ka & Impure) -> ka & Impure
 
 
 
@@ -39,19 +41,25 @@ namespace MonadLib/Monad/ContRWS {
     ///
     /// Returns the result of `ma`.
     ///
-    pub def runContRWS(ma: ContRWS[(a, s, w), r, w, s, a], r: r, s: s): (a, s, w) & Impure with Monoid[w]=
+    pub def runContRWS(ma: ContRWS[(a, s, w), r, w, s, a], r: r, s: s): (a, s, w) & Impure with Monoid[w] =
         let ContRWS(f) = ma;
         let cont = (a, s, w) -> (a, s, w) as & Impure;
         f(r, s, Monoid.empty(), cont)
-/*
+
     ///
-    /// Returns just the "output" of `ma`.
+    /// Returns answer and output `ma`.
     ///
-    pub def execContRWS(ma: ContRWS[w, w, a]): w & Impure =
-        let ContRWS(f) = ma;
-        let cont = (_, w) -> w as & Impure;
-        f(cont)
-*/
+    pub def evalContRWS(ma: ContRWS[(a, s, w), r, w, s, a], r: r, s: s): (a, w) & Impure with Monoid[w] =
+        let (a, _, w) = runContRWS(ma, r, s);
+        (a, w)
+
+
+    ///
+    /// Returns final state and output `ma`.
+    ///
+    pub def execContRWS(ma: ContRWS[(a, s, w), r, w, s, a], r: r, s: s): (s, w) & Impure with Monoid[w] =
+        let (_, s1, w) = runContRWS(ma, r, s);
+        (s1, w)
 
 
     instance Functor[ContRWS[ka, r, w, s]] {
@@ -84,12 +92,47 @@ namespace MonadLib/Monad/ContRWS {
             ) as & ef
     }
 
-/*
-    pub def tell(a: w): ContRWS[ka, w, Unit] = 
-        ContRWS(k -> 
-            k(() as & Impure, a)
+
+    pub def tell(a: w): ContRWS[ka, r, w, s, Unit] with SemiGroup[w] = 
+        ContRWS((_, s, w, k) ->
+            k(() as & Impure, s, w ++ a)
         )
 
-*/
+
+    pub def ask(): ContRWS[ka, r, w, s, r] = 
+        ContRWS((r, s, w, k) ->
+            k(r as & Impure, s, w)
+        )
+
+    pub def asks(f: r -> a & ef): ContRWS[ka, r, w, s, a] & ef =
+        ContRWS((r, s, w, k) ->
+            k(f(r) as & Impure, s, w)
+        ) as & ef
+
+    pub def local(f: r -> r, ma: ContRWS[ka, r, w, s, a]): ContRWS[ka, r, w, s, a] & ef = 
+        ContRWS((r, s, w, k) ->
+            apply1(ma, f(r), s, w, a1 -> 
+                k(a1))
+        ) as & ef
+
+    pub def update(f: s -> s & ef): ContRWS[ka, r, w, s, Unit] & ef = 
+        ContRWS((_, s, w, k) ->
+            k((), f(s) as & Impure, w)
+        ) as & ef
+
+    pub def put(st: s): ContRWS[ka, r, w, s, Unit]  = 
+        ContRWS((_, _, w, k) ->
+            k((), st, w)
+        )
+
+    pub def get(): ContRWS[ka, r, w, s, s] =  
+        ContRWS((_, s, w, k) ->
+            k(s, s, w)
+        )
+
+    pub def gets(proj: s -> a & ef): ContRWS[ka, r, w, s, a] & ef =  
+        ContRWS((_, s, w, k) ->
+            k(proj(s) as & Impure, s, w)
+        ) as & ef
 
 }

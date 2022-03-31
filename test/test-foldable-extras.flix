@@ -3,7 +3,7 @@ namespace TestFoldableExtras {
 
 
 use Applicative.{point};
-use MonadLib/Monad.ContWriter;
+use MonadLib/Monad/ContWriter.ContWriter;
 use MonadLib/Monad/ContWriter.{runContWriter, tell};
 
 @test

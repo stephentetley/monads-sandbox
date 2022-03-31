@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-namespace MonadLib/Monad {
+namespace MonadLib/Monad/ContWriter {
+
     ///
     /// ContWriter is the Writer monad implemented in CPS. 
     ///
@@ -41,17 +42,8 @@ namespace MonadLib/Monad {
 
     instance Monad[ContWriter[ka, w]] with Monoid[w] {
         pub def flatMap(f: a -> ContWriter[ka, w, b] & ef, ma: ContWriter[ka, w, a]): ContWriter[ka, w, b] & ef =
-            MonadLib/Monad/ContWriter.flatMap(f, ma)
+            flatMap(f, ma)
     }
-
-
-}
-
-namespace MonadLib/Monad/ContWriter {
-
-
-    use MonadLib/Monad.ContWriter;
-    use MonadLib/Monad.ContWriter.{ContWriter};
 
     ///
     /// Helper function for ContWriter's implementations of `map` and `ap`.

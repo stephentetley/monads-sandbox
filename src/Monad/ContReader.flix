@@ -83,10 +83,6 @@ namespace MonadLib/Monad/ContReader {
             k(f(r) as & Impure)
         ) as & ef
 
-
-    /// `local` is untested...
-
-
     pub def local(f: r -> r, ma: ContReader[ka, r, a]): ContReader[ka, r, a] & ef = 
         ContReader((r, k) -> 
             apply1(ma, f(r), a1 -> 
