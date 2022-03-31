@@ -63,13 +63,16 @@ namespace MonadLib/Monad/ContReader {
 
     instance Monad[ContReader[ka, r]] {
         pub def flatMap(f: a -> ContReader[ka, r, b] & ef, ma: ContReader[ka, r, a]): ContReader[ka, r, b] & ef =
-            ContReader((r, k) ->
-                apply1(ma, r, a1 ->
-                    apply1(f(a1) as & Impure, r, b1 ->
-                        k(b1)))
-            ) as & ef
+            flatMap(f, ma)
     }
 
+    pub def flatMap(f: a -> ContReader[ka, r, b] & ef, ma: ContReader[ka, r, a]): ContReader[ka, r, b] & ef =
+        ContReader((r, k) ->
+            apply1(ma, r, a1 ->
+                apply1(f(a1) as & Impure, r, b1 ->
+                    k(b1)))
+        ) as & ef
+        
     pub def ask(): ContReader[ka, r, r] = 
         ContReader((r, k) -> 
             k(r)
