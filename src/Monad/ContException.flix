@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Stephen Tetley
+ * Copyright 2022 Stephen Tetley
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,7 @@
 namespace MonadLib/Monad/ContException {
 
     ///
-    /// ContReader is the Reader monad implemented in CPS. 
-    ///
-    /// We use an Impure continuation so we can internally cast the `ef` of operations and not lose
-    /// impurity information.
+    /// ContException is the codensity version of the Either monad.
     ///
     pub opaque type ContException[ka, e, a] = (a -> Result[ka, e] & Impure) -> Result[ka, e] & Impure
 
@@ -30,7 +27,7 @@ namespace MonadLib/Monad/ContException {
 
 
     ///
-    /// Helper function for ContReader's implementations of `map` and `ap`.
+    /// Helper function for the implementation of `map` and `ap` etc.
     ///
     def apply1(ma: ContException[ka, e, a], k: a -> Result[ka, e] & Impure): Result[ka, e] & Impure =
         let ContException(ma1) = ma;
@@ -38,9 +35,9 @@ namespace MonadLib/Monad/ContException {
 
 
     ///
-    /// Returns the result of applying `ma` to `r`.
+    /// Runs `ma` returning a `Result`.
     ///
-    pub def runContException(ma: ContException[a, r, a]): Result[a, r] & Impure =
+    pub def runContException(ma: ContException[a, e, a]): Result[a, e] & Impure =
         let ContException(ma1) = ma;
         ma1(a -> Ok(a) as & Impure)
 
@@ -56,7 +53,7 @@ namespace MonadLib/Monad/ContException {
     instance Applicative[ContException[ka, e]] {
         pub def point(x: a): ContException[ka, e, a] = ContException(k -> k(x))
 
-        pub def ap(mf: ContException[ka, e, a -> b & ef], ma: ContException[ka, e, a]): ContException[ka,e, b] & ef =
+        pub def ap(mf: ContException[ka, e, a -> b & ef], ma: ContException[ka, e, a]): ContException[ka, e, b] & ef =
             ContException(k ->
                 apply1(mf, f1 ->
                     apply1(ma, a1 ->
