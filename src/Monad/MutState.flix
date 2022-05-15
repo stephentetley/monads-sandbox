@@ -47,8 +47,8 @@ namespace MonadLib/Monad/MutState {
         
    
     /// Ideally we want stronger contraints on `update` and `asks` 
-    /// `update` should only be allowed on "writeable" handle
-    /// `asks` should only be allowed on a "readable" handle
+    /// `update` should only be allowed on "writeable" state
+    /// `asks` should only be allowed on a "readable" state
 
 
     pub def update(upd: st -> Unit & ef): MutState[ef, ka, st, Unit] =

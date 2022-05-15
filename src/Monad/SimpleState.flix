@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-/// Note - I have realized this is wrong.
-/// If we have mutable state all we need is a Handle monad - pairing the state in the answer
-/// just leads to aliasing.
 
 namespace MonadLib/Monad/SimpleState {
 
     ///
-    /// State monad with polymorphic effect
+    /// State monad should only be used with immutable state types!
     ///
-    /// Note - if we have impure state we can't allow backtracking.
-    /// (Backtracking is not in the StateMonad API but we must be careful not to use this as a template
-    /// for more "full featured" monads)
+    /// Use MutState monad if you have mutable state
     ///
-    pub opaque type State[ef: Bool, st: Type, a: Type] = st -> (st, a) & ef
+    pub opaque type State[st: Type, a: Type] = st -> (st, a)
 
     
 
@@ -35,7 +30,7 @@ namespace MonadLib/Monad/SimpleState {
     ///
     /// Helper function for the implementation of `map` and `ap` etc.
     ///
-    def apply1(ma: State[ef, st, a], s: st): (st, a) & ef =
+    def apply1(ma: State[st, a], s: st): (st, a) =
         let State(ma1) = ma;
         ma1(s)
 
@@ -44,49 +39,49 @@ namespace MonadLib/Monad/SimpleState {
     ///
     /// Runs `ma` returning an `Option`.
     ///
-    pub def runState(ma: State[ef, st, a], s: st): (st, a) & ef =
+    pub def runState(ma: State[st, a], s: st): (st, a) =
         apply1(ma, s)
 
 
-    instance Functor[State[ef, st]] {
-        pub def map(f: a -> b & ef1, ma: State[ef, st, a]): State[ef, st, b] & ef1 =
+    instance Functor[State[st]] {
+        pub def map(f: a -> b & ef, ma: State[st, a]): State[st, b] & ef =
             State(s ->
                 let (s1, a) = apply1(ma, s);
-                (s1, f(a) as & ef)
-            ) as & ef1
+                (s1, f(a) as & Pure)
+            ) as & ef
     }
 
 
-    instance Applicative[State[ef, st]] {
-        pub def point(x: a): State[ef, st, a] = State(s -> (s, x) as & ef)
+    instance Applicative[State[st]] {
+        pub def point(x: a): State[st, a] = State(s -> (s, x))
 
-        pub def ap(mf: State[ef, st, a -> b & ef1], ma: State[ef, st, a]): State[ef, st, b] & ef1 =
+        pub def ap(mf: State[st, a -> b & ef], ma: State[st, a]): State[st, b] & ef =
             State(s ->
                 let (s1, f) = apply1(mf, s);
                 let (s2, a) = apply1(ma, s1);
-                (s2, f(a) as & ef)
-            ) as & ef1
+                (s2, f(a) as & Pure)
+            ) as & ef
     }
 
 
-    instance Monad[State[ef, st]] {
-        pub def flatMap(f: a -> State[ef, st, b] & ef1, ma: State[ef, st, a]): State[ef, st, b] & ef1 =
+    instance Monad[State[st]] {
+        pub def flatMap(f: a -> State[st, b] & ef, ma: State[st, a]): State[st, b] & ef =
             flatMap(f, ma)
     }
 
-    pub def flatMap(f: a -> State[ef, st, b] & ef1, ma: State[ef, st, a]): State[ef, st, b] & ef1 =
+    pub def flatMap(f: a -> State[st, b] & ef, ma: State[st, a]): State[st, b] & ef =
         State(s ->
             let (s1, a) = apply1(ma, s);
-            apply1(f(a) as & ef, s1)
-        ) as & ef1
+            apply1(f(a) as & Pure, s1)
+        ) as & ef
   
-    pub def getState(): State[ef, st, st] =
-        State(s -> (s, s) as & ef)
+    pub def getState(): State[st, st] =
+        State(s -> (s, s))
 
-    pub def setState(st: st): State[ef, st, Unit] =
-        State(_ -> (st, ()) as & ef)
+    pub def setState(st: st): State[st, Unit] =
+        State(_ -> (st, ()))
 
-    pub def sets(upd: st -> st & ef1): State[ef1, st, Unit] =
-        State(s -> (upd(s), ()))
+    pub def sets(upd: st -> st & ef): State[st, Unit] & ef =
+        State(s -> (upd(s) as & Pure, ())) as & ef
 
 }
