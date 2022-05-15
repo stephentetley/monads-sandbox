@@ -18,7 +18,7 @@
 ///
 /// A type class for moniodal applicative functors biased to "choice" / "alternative".
 ///
-pub lawless class FunctorWithIndex[m : Type -> Type] with Functor[m] {
+pub class FunctorWithIndex[m : Type -> Type] with Functor[m] {
 
     pub def mapWithIndex(f: a -> Int32 -> b & ef, x: m[a]): m[b] & ef
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-pub lawless class Unfoldable[t: Type -> Type] {
+pub class Unfoldable[t: Type -> Type] {
 
     pub def unfold(f: b -> Option[(a, b)] & ef, start: b): t[a] & ef
 

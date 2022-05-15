@@ -85,13 +85,15 @@ namespace MonadLib/Monad/ContRWS {
 
     instance Monad[ContRWS[ka, r, w, s]] {
         pub def flatMap(f: a -> ContRWS[ka, r, w, s, b] & ef, ma: ContRWS[ka, r, w, s, a]): ContRWS[ka, r, w, s, b] & ef =
-            ContRWS((r, s, w, k) ->
-                apply1(ma, r, s, w, (a1, s1, w1) ->
-                    apply1(f(a1) as & Impure, r, s1, w1, (b1, s2, w2) ->
-                        k(b1, s2, w2)))
-            ) as & ef
+            flatMap(f, ma)
     }
 
+    pub def flatMap(f: a -> ContRWS[ka, r, w, s, b] & ef, ma: ContRWS[ka, r, w, s, a]): ContRWS[ka, r, w, s, b] & ef =
+        ContRWS((r, s, w, k) ->
+            apply1(ma, r, s, w, (a1, s1, w1) ->
+                apply1(f(a1) as & Impure, r, s1, w1, (b1, s2, w2) ->
+                    k(b1, s2, w2)))
+        ) as & ef
 
     pub def tell(a: w): ContRWS[ka, r, w, s, Unit] with SemiGroup[w] = 
         ContRWS((_, s, w, k) ->

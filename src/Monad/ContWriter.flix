@@ -27,16 +27,16 @@ namespace MonadLib/Monad/ContWriter {
 
     instance Functor[ContWriter[ka, w]] {
         pub def map(f: a -> b & ef, ma: ContWriter[ka, w, a]): ContWriter[ka, w, b] & ef =
-            MonadLib/Monad/ContWriter.map(f, ma)
+            map(f, ma)
     }
 
 
     instance Applicative[ContWriter[ka, w]] with Monoid[w] {
         pub def point(x: a): ContWriter[ka, w, a] =
-            MonadLib/Monad/ContWriter.point(x)
+            point(x)
 
         pub def ap(mf: ContWriter[ka, w, a -> b & ef], ma: ContWriter[ka, w, a]): ContWriter[ka, w, b] & ef =
-            MonadLib/Monad/ContWriter.ap(mf, ma)
+            ap(mf, ma)
     }
 
 
@@ -80,11 +80,11 @@ namespace MonadLib/Monad/ContWriter {
 
 
     pub def ap(mf: ContWriter[ka, w, a -> b & ef], ma: ContWriter[ka, w, a]): ContWriter[ka, w, b] & ef with Monoid[w] =
-            ContWriter(k ->
-                apply1(mf, (f1, w1) ->
-                    apply1(ma, (a1, w2) ->
-                        k(f1(a1) as & Impure, Monoid.combine(w1, w2))))
-            ) as & ef
+        ContWriter(k ->
+            apply1(mf, (f1, w1) ->
+                apply1(ma, (a1, w2) ->
+                    k(f1(a1) as & Impure, Monoid.combine(w1, w2))))
+        ) as & ef
 
     pub def flatMap(f: a -> ContWriter[ka, w, b] & ef, ma: ContWriter[ka, w, a]): ContWriter[ka, w, b] & ef with Monoid[w] =
         ContWriter(k ->

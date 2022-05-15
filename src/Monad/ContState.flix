@@ -66,14 +66,15 @@ namespace MonadLib/Monad/ContState {
 
     instance Monad[ContState[ka, s]] {
         pub def flatMap(f: a -> ContState[ka, s, b] & ef, ma: ContState[ka, s, a]): ContState[ka, s, b] & ef =
-            ContState((s, k) ->
-                apply1(ma, s, (a, s1) ->
-                    apply1(f(a) as & Impure, s1, (b, s2) ->
-                        k(b, s2)))
-            ) as & ef
+            flatMap(f, ma)
     }
-
-    /// update is tricky, we must update the state for the rest of the computation, are we sure this works...
+        
+    pub def flatMap(f: a -> ContState[ka, s, b] & ef, ma: ContState[ka, s, a]): ContState[ka, s, b] & ef =
+        ContState((s, k) ->
+            apply1(ma, s, (a, s1) ->
+                apply1(f(a) as & Impure, s1, (b, s2) ->
+                    k(b, s2)))
+        ) as & ef
 
     pub def update(f: s -> s & ef): ContState[ka, s, Unit] & ef = 
         ContState((s, k) -> 

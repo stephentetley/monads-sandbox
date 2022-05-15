@@ -77,4 +77,15 @@ namespace MonadLib/Monad/ContException {
     pub def throwError(err: e): ContException[ka, e, a] = 
         ContException(_ -> Err(err) as & Impure)
 
+
+    pub def either(f: e -> b & ef1, g: a -> b & ef2, ma: ContException[a, e, a]): b & Impure = 
+        match runContException(ma) { 
+            case Err(e) => f(e) as & Impure
+            case Ok(a) => g(a) as & Impure
+        }
+
+    pub def catchError(ma: ContException[a, e, a], handler: e -> ContException[a, e1, a] & ef): ContException[a, e1, a] & ef= 
+        either(handler, Applicative.point, ma) as & ef
+
+
 }

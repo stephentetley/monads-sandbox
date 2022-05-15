@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-pub lawless class Compactable[t: Type -> Type] {
+pub class Compactable[t: Type -> Type] {
 
     pub def compact(t: t[Option[a]]): t[a]
 

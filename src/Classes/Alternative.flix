@@ -20,7 +20,7 @@
 ///
 /// A type class for moniodal applicative functors biased to "choice" / "alternative".
 ///
-pub lawless class Alt[m: Type -> Type] with Applicative[m] {
+pub class Alt[m: Type -> Type] with Applicative[m] {
 
     pub def alt(x: m[a], y: m[a]): m[a] 
 
@@ -31,7 +31,7 @@ pub lawless class Alt[m: Type -> Type] with Applicative[m] {
 ///
 /// A type class for moniodal applicative functors biased to "choice" / "alternative".
 ///
-pub lawless class Alternative[m: Type -> Type] with Alt[m] {
+pub class Alternative[m: Type -> Type] with Alt[m] {
 
     pub def zero(): m[a]
 

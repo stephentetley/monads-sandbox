@@ -24,7 +24,7 @@
 
 
 
-pub lawless class Many[m : Type -> Type] with Alternative[m] {
+pub class Many[m : Type -> Type] with Alternative[m] {
 
     ///
     /// Must be stack-safe for derived combinators to work safely.

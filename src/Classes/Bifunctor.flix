@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-pub lawless class Bifunctor[f: Type -> Type -> Type] {
+pub class Bifunctor[f: Type -> Type -> Type] {
 
     pub def bimap(f: a -> c & ef1, g: b -> d & ef2, x: f[a, b]): f[c, d] & (ef1 and ef2)
 
