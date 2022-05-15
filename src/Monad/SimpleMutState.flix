@@ -16,19 +16,19 @@
 
 
 
-/// Handle is a monad for Impure state
+/// SimpleMutState is a monad for mutable state
 /// We don't need to pair the state/handle in the return type (c.f. the pure state monad)
 /// as it would just be an alias of the handle on the LHS.
 /// Basically the monad is Reader but local is not allowed as we cannot reset the state.
 
 /// For real world use this should written in CPS...
 
-namespace MonadLib/Monad/Handle {
+namespace MonadLib/Monad/SimpleMutState {
 
     ///
-    /// Handle monad with encapsulated effect
+    /// MutState monad with encapsulated effect
     ///
-    pub opaque type Handle[ef: Bool, h: Type, a: Type] = h -> a & ef
+    pub opaque type SimpleMutState[ef: Bool, h: Type, a: Type] = h -> a & ef
 
  
 
@@ -36,15 +36,15 @@ namespace MonadLib/Monad/Handle {
     ///
     /// Helper function for the implementation of `map` and `ap` etc.
     ///
-    pub def apply1(ma: Handle[ef, h, a], h: h): a & ef =
-        let Handle(ma1) = ma;
+    def apply1(ma: SimpleMutState[ef, h, a], h: h): a & ef =
+        let SimpleMutState(ma1) = ma;
         ma1(h)
 
 
     ///
     /// Runs `ma` on a handle
     ///
-    pub def runHandle(ma: Handle[ef, h, a], h: h): a & ef =
+    pub def runSimpleMutState(ma: SimpleMutState[ef, h, a], h: h): a & ef =
         apply1(ma, h)
         
      
@@ -53,26 +53,26 @@ namespace MonadLib/Monad/Handle {
     /// `asks` should only be allowed on a "readable" handle
 
 
-    pub def update(upd: h -> Unit & ef): Handle[ef, h, Unit] =
-        Handle(h -> upd(h))
+    pub def update(upd: h -> Unit & ef): SimpleMutState[ef, h, Unit] =
+        SimpleMutState(h -> upd(h))
 
-    pub def asks(f: h -> a & ef): Handle[ef, h, a] =
-        Handle(h -> f(h))
+    pub def asks(f: h -> a & ef): SimpleMutState[ef, h, a] =
+        SimpleMutState(h -> f(h))
 
 
-    instance Functor[Handle[ef, h]] {
-        pub def map(f: a -> b & ef1, ma: Handle[ef, h, a]): Handle[ef, h, b] & ef1 =
-            Handle(h ->
+    instance Functor[SimpleMutState[ef, h]] {
+        pub def map(f: a -> b & ef1, ma: SimpleMutState[ef, h, a]): SimpleMutState[ef, h, b] & ef1 =
+            SimpleMutState(h ->
                 let a = apply1(ma, h);
                 f(a) as & ef
             ) as & ef1
     }
 
-    instance Applicative[Handle[ef, h]] {
-        pub def point(x: a): Handle[ef, h, a] = Handle(_ -> x as & ef)
+    instance Applicative[SimpleMutState[ef, h]] {
+        pub def point(x: a): SimpleMutState[ef, h, a] = SimpleMutState(_ -> x as & ef)
 
-        pub def ap(mf: Handle[ef, h, a -> b & ef1], ma: Handle[ef, h, a]): Handle[ef, h, b] & ef1 =
-            Handle(h ->
+        pub def ap(mf: SimpleMutState[ef, h, a -> b & ef1], ma: SimpleMutState[ef, h, a]): SimpleMutState[ef, h, b] & ef1 =
+            SimpleMutState(h ->
                 let f = apply1(mf, h);
                 let a = apply1(ma, h);
                 f(a) as & ef
@@ -80,13 +80,13 @@ namespace MonadLib/Monad/Handle {
     }
 
 
-    instance Monad[Handle[ef, h]] {
-        pub def flatMap(f: a -> Handle[ef, h, b] & ef1, ma: Handle[ef, h, a]): Handle[ef, h, b] & ef1 =
+    instance Monad[SimpleMutState[ef, h]] {
+        pub def flatMap(f: a -> SimpleMutState[ef, h, b] & ef1, ma: SimpleMutState[ef, h, a]): SimpleMutState[ef, h, b] & ef1 =
             flatMap(f, ma)
     }
 
-    pub def flatMap(f: a -> Handle[ef, h, b] & ef1, ma: Handle[ef, h, a]): Handle[ef, h, b] & ef1 =
-        Handle(h ->
+    pub def flatMap(f: a -> SimpleMutState[ef, h, b] & ef1, ma: SimpleMutState[ef, h, a]): SimpleMutState[ef, h, b] & ef1 =
+        SimpleMutState(h ->
             let a = apply1(ma, h);
             apply1(f(a) as & ef, h)
         ) as & ef1
