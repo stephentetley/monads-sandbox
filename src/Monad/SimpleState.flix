@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-
+/// Note - I have realized this is wrong.
+/// If we have mutable state all we need is a Handle monad - pairing the state in the answer
+/// just leads to aliasing.
 
 namespace MonadLib/Monad/SimpleState {
 
@@ -72,12 +74,19 @@ namespace MonadLib/Monad/SimpleState {
             flatMap(f, ma)
     }
 
-    pub def flatMap(f: a -> State[ef, st,  b] & ef1, ma: State[ef, st, a]): State[ef, st, b] & ef1 =
+    pub def flatMap(f: a -> State[ef, st, b] & ef1, ma: State[ef, st, a]): State[ef, st, b] & ef1 =
         State(s ->
             let (s1, a) = apply1(ma, s);
             apply1(f(a) as & ef, s1)
         ) as & ef1
   
+    pub def getState(): State[ef, st, st] =
+        State(s -> (s, s) as & ef)
 
+    pub def setState(st: st): State[ef, st, Unit] =
+        State(_ -> (st, ()) as & ef)
+
+    pub def sets(upd: st -> st & ef1): State[ef1, st, Unit] =
+        State(s -> (upd(s), ()))
 
 }
