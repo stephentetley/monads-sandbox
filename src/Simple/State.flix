@@ -15,7 +15,7 @@
  */
 
 
-namespace MonadLib/Monad/SimpleState {
+namespace MonadLib/Simple/State {
 
     ///
     /// State monad should only be used with immutable state types!
