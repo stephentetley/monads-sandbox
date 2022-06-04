@@ -27,7 +27,7 @@ namespace MonadLib/Monad/MutState {
     ///
     /// MutState monad with encapsulated effect
     ///
-    pub opaque type MutState[ef: Bool, ka: Type, st: Type, a: Type] = st -> (a -> ka & ef) -> ka & ef
+    pub enum MutState[ef: Bool, ka: Type, st: Type, a: Type](st -> (a -> ka & ef) -> ka & ef)
 
 
 

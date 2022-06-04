@@ -21,7 +21,7 @@ namespace MonadLib/Monad/Error {
     ///
     /// Error is the codensity version of the Either monad.
     ///
-    pub opaque type Error[ka, e, a] = (a -> Result[ka, e]) -> Result[ka, e]
+    pub enum Error[ka, e, a]((a -> Result[ka, e]) -> Result[ka, e])
 
     
 

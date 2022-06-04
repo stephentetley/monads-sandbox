@@ -26,7 +26,7 @@ namespace MonadLib/Monad/RWS {
     /// We use an Impure continuation so we can internally cast the `ef` of operations and not lose
     /// impurity information.
     ///
-    pub opaque type RWS[ka, r, w, s, a] = r -> s -> w -> (a -> s -> w -> ka) -> ka
+    pub enum RWS[ka, r, w, s, a](r -> s -> w -> (a -> s -> w -> ka) -> ka)
 
 
 

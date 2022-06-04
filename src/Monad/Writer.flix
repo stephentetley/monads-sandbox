@@ -21,7 +21,7 @@ namespace MonadLib/Monad/Writer {
     ///
     /// The writer type should be pure, if you want to use StringBuilder or another mutable type use MutState.
     ///
-    pub opaque type Writer[ka, w, a] = (a -> w -> ka) -> ka
+    pub enum Writer[ka, w, a]((a -> w -> ka) -> ka)
 
 
     instance Functor[Writer[ka, w]] {

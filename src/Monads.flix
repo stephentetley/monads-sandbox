@@ -18,19 +18,19 @@
 
 namespace MonadLib/Monads {
 
-    pub opaque type Id[a] with ToString = a
+    pub enum Id[a](a) with ToString
 
-    pub opaque type Exception[i, a] = Result[a, i]
+    pub enum Exception[i, a](Result[a, i])
 
     /// ??? How to deal with effects? - don't float them up to the top level.
 
-    pub opaque type Reader[i, a] = i -> a
+    pub enum Reader[i, a](i -> a)
 
-    pub opaque type Writer[i, a] = (i, a)
+    pub enum Writer[i, a]((i, a))
 
-    pub opaque type State[i, a] = i -> (i, a)
+    pub enum State[i, a](i -> (i, a))
 
-    pub opaque type Cont[i, a] = a -> i -> i
+    pub enum Cont[i, a](a -> i -> i)
 
     /// Instances
 

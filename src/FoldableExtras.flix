@@ -70,25 +70,25 @@ namespace FoldableExtras {
     pub def concatMap(f: a -> List[b], t: t[a]): List[b] with Foldable[t] =
         Foldable.foldLeft((ac, x) -> Chain.append(ac, List.toChain(f(x))), Chain.empty(), t) |> Chain.toList
 
-    /// `String.unlines` generalized to any Foldable `t[String]`.
-    pub def unlines(t: t[String]): String with Foldable[t] = unlinesHelper(t) as & Pure
+    /// /// `String.unlines` generalized to any Foldable `t[String]`.
+    /// pub def unlines(t: t[String]): String with Foldable[t] = 
+    ///     region r {
+    ///         let sb = new StringBuilder(r);
+    ///         Foldable.foldLeft((_, x) -> StringBuilder.appendLine!(x, sb), (), t);
+    ///         StringBuilder.toString(sb)
+    ///     }
 
-    def unlinesHelper(t: t[String]): String & Impure with Foldable[t] =
-        let sb = StringBuilder.new();
-        Foldable.foldLeft((_, x) -> StringBuilder.appendLine!(x, sb), (), t);
-        StringBuilder.toString(sb)
-
-    /// `String.unwords` generalized to any Foldable `t[String]`.
-    pub def unwords(t: t[String]): String with Foldable[t] = unwordsHelper(t) as & Pure
-
-    def unwordsHelper(t: t[String]): String & Impure with Foldable[t] =
-        let sb = StringBuilder.new();
-        let step = (n, x) ->
-            if (n < 1)
-                {StringBuilder.appendString!(x, sb); n + 1}
-            else
-                {StringBuilder.append!(' ', sb); StringBuilder.appendString!(x, sb); n + 1};
-        Foldable.foldLeft(step, 0, t);
-        StringBuilder.toString(sb)
+    /// /// `String.unwords` generalized to any Foldable `t[String]`.
+    /// pub def unwords(t: t[String]): String with Foldable[t] = 
+    ///     region r { 
+    ///         let sb = new StringBuilder(r);
+    ///         let step = (n, x) ->
+    ///             if (n < 1)
+    ///                 {StringBuilder.appendString!(x, sb); n + 1}
+    ///             else
+    ///                 {StringBuilder.append!(' ', sb); StringBuilder.appendString!(x, sb); n + 1};
+    ///         Foldable.foldLeft(step, 0, t);
+    ///         StringBuilder.toString(sb)
+    ///     }
 
 }

@@ -24,7 +24,7 @@ namespace MonadLib/Monad/State {
     /// A simple implementation of the State monad bursts the stack when `mapAccumLeft` is run on large
     /// collections, so use State the CPS-State monad instead.
     ///
-    pub opaque type State[ka, s, a] = s -> (a -> s -> ka) -> ka
+    pub enum State[ka, s, a](s -> (a -> s -> ka) -> ka)
 
     ///
     /// Helper function for State's implementations of `map` and `ap`.

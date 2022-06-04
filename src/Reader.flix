@@ -19,7 +19,7 @@
 namespace MonadLib/Reader {
 
     /// ??? How to deal with effects?
-    pub opaque type Reader[i, a] = i -> a & Impure
+    pub enum Reader[i, a](i -> a & Impure)
 
     
     instance Functor[Reader[i]] { 

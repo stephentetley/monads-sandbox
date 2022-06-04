@@ -21,7 +21,7 @@ namespace MonadLib/Monad/Reader {
     ///
     /// Pure Reader monad implemented in CPS. 
     ///
-    pub opaque type Reader[ka, r, a] = r -> (a -> ka) -> ka
+    pub enum Reader[ka, r, a](r -> (a -> ka) -> ka)
 
     ///
     /// Helper function for Reader's implementations of `map` and `ap`.

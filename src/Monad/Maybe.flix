@@ -21,7 +21,7 @@ namespace MonadLib/Monad/Maybe {
     ///
     /// Maybe is the codensity version of the Maybe monad.
     ///
-    pub opaque type Maybe[ka, a] = (a -> Option[ka]) -> Option[ka]
+    pub enum Maybe[ka, a]((a -> Option[ka]) -> Option[ka])
 
     
 

@@ -21,7 +21,7 @@ namespace MonadLib/Transformers {
 
     /// Transformers cause the compiler to crash...
     
-    /// pub opaque type IdT[m :# Type -> Type, a] = m[a]
+    /// pub enum IdT[m :# Type -> Type, a](m[a])
 
 
     /// instance Functor[Id] { 

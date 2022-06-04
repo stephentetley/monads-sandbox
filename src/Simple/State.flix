@@ -22,7 +22,7 @@ namespace MonadLib/Simple/State {
     ///
     /// Use MutState monad if you have mutable state
     ///
-    pub opaque type State[st: Type, a: Type] = st -> (st, a)
+    pub enum State[st: Type, a: Type](st -> (st, a))
 
     
 
