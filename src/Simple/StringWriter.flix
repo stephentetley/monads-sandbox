@@ -20,7 +20,7 @@
 namespace MonadLib/Monad/Simple/StringWriter {
 
     ///
-    /// MutState monad with encapsulated effect and region
+    /// MutState monad with encapsulated region
     ///
     pub enum StringWriter[r: Region, a: Type](StringBuilder[r] -> a)
 
@@ -75,7 +75,7 @@ namespace MonadLib/Monad/Simple/StringWriter {
 
     pub def runStringWriter(r: Region[r], m: StringWriter[r, a]): (String, a) \ { Read(r), Write(r) } =
         let StringWriter(m1) = m;
-        let sb = new StringWBuilder(r);
+        let sb = new StringBuilder(r);
         let ans = m1(sb);
         let s = StringBuilder.toString(sb);
         (s, ans)
@@ -84,6 +84,11 @@ namespace MonadLib/Monad/Simple/StringWriter {
     pub def demo01(): (String, Unit) =
         region r {
             runStringWriter(r, tell("Hello World!"))
+        }
+
+    pub def demo02(): (String, Int32) =
+        region r {
+            runStringWriter(r, Applicative.point(5))
         }
 
 }
