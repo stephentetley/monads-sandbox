@@ -67,6 +67,7 @@ instance Unfoldable[Option] {
 
 namespace Unfoldable {
 
+    def constant(x: a, _: b): a = x
 
     pub def replicateA(n: Int32, x: m[a]): m[t[a]] with Applicative[m], Traversable[t], Unfoldable[t] =
         Traversable.sequence(Unfoldable.replicate(n, x)) 

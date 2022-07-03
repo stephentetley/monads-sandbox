@@ -121,9 +121,9 @@ namespace MonadLib/Monads {
             let Reader(f1) = f;
             let Reader(x1) = x;
             Reader(r -> {
-                let f = f1(r);
+                let f2 = f1(r);
                 let a = x1(r);
-                f(a) as & Pure
+                f2(a) as & Pure
             }) as & ef
     }
 
@@ -135,9 +135,9 @@ namespace MonadLib/Monads {
             let State(f1) = f;
             let State(x1) = x;
             State(s -> {
-                let (s1, f) = f1(s);
+                let (s1, f2) = f1(s);
                 let (s2, a) = x1(s1);
-                (s2, f(a)) as & Pure
+                (s2, f2(a)) as & Pure
             }) as & ef
     }
 

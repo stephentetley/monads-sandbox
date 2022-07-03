@@ -42,7 +42,7 @@ namespace MonadLib/Monad/MutState {
     ///
     /// Runs `ma` on a handle
     ///
-    pub def runHandle(ma: MutState[ef, a, st, a], s: st): a & ef =
+    pub def runMutState(ma: MutState[ef, a, st, a], s: st): a & ef =
         apply1(ma, s, k -> k as & ef)
         
    

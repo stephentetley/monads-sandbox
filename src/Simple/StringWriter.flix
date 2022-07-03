@@ -19,8 +19,10 @@
 
 namespace MonadLib/Monad/Simple/StringWriter {
 
+    use Applicative.{*>};
+
     ///
-    /// MutState monad with encapsulated region
+    /// MutState monad with with state fixed to a StringBuilder
     ///
     pub enum StringWriter[r: Region, a: Type](StringBuilder[r] -> a)
 
@@ -91,4 +93,13 @@ namespace MonadLib/Monad/Simple/StringWriter {
             runStringWriter(r, Applicative.point(5))
         }
 
+
+    pub def action1(): StringWriter[r, Int32] \ Write(r) =
+        tell("Hello World!") *> Applicative.point(0)
+
+    pub def demo03(): (String, Int32) =
+        region r {
+            runStringWriter(r, action1())
+        }
+        
 }

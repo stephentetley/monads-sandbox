@@ -43,7 +43,7 @@ namespace MonadLib/Monad/RWS {
     ///
     pub def runRWS(ma: RWS[(a, s, w), r, w, s, a], r: r, s: s): (a, s, w) with Monoid[w] =
         let RWS(f) = ma;
-        let cont = (a, s, w) -> (a, s, w);
+        let cont = (a, s1, w1) -> (a, s1, w1);
         f(r, s, Monoid.empty(), cont)
 
     ///
