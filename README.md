@@ -1,5 +1,5 @@
-# flix-monadlib
+# monads-sandbox
 
-Experiments to define monads and libraries of base Monad and Applicative functions in Flix. 
+Experiments and an incubator to define monads for Flix. 
 
-Currently not a usable library.
+Not a usable library.
