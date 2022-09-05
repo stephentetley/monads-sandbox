@@ -78,11 +78,36 @@ ifThenElse1 ma sk fk =
                     Err e  -> apply1 (fk e) $ \b1 -> k b1
                 )
 
+
+class MonadError m => MonadSuccess m where
+    whenOk :: m a -> (a -> m b) -> m b
+
+
+instance MonadSuccess Error where
+    whenOk ma sk = success1 ma sk
+
+-- This has the same type as bind...
+success1 :: Error a -> (a -> Error b) -> Error b
+success1 ma sk = 
+    Error(\k -> case runError(ma)  of
+                    Ok a1  -> apply1 (sk a1) $ \b1 -> k b1
+                    Err e  -> Err e
+                )
+
+{-
 foldLeftM :: IfThenElse m => (b -> a -> m b) -> b -> [a] -> m b
 foldLeftM f s l =
     let loop ll acc = case ll of
                         []     -> pure acc
                         x : xs -> ifThenElse (f acc x) (\ans -> loop xs ans) (\e -> throwError e)
+    in loop l s
+-}
+
+foldLeftM :: MonadSuccess m => (b -> a -> m b) -> b -> [a] -> m b
+foldLeftM f s l =
+    let loop ll acc = case ll of
+                        []     -> pure acc
+                        x : xs -> whenOk (f acc x) (\ans -> loop xs ans)
     in loop l s
 
 traverseCps :: IfThenElse m => (a -> m b) -> [a] -> m [b]
@@ -92,7 +117,18 @@ traverseCps f l =
                         x : xs -> ifThenElse (f x) (\a1 -> loop xs (\ks -> k (a1 : ks))) (\e -> throwError e)
     in loop l pure
 
+
+-- Bind must be stack safe...
+traverseCps1 :: Monad m => (a -> m b) -> [a] -> m [b]
+traverseCps1 f l = 
+    let loop ll k = case ll of
+                        []     -> k []
+                        x : xs -> (f x) >>= (\a1 -> loop xs (\ks -> k (a1 : ks)))
+    in loop l pure    
+
 fl01 = runError $ foldLeftM (\acc x -> if x < 100 then pure (x + acc) else throwError "too big") 0 [0 .. 99] 
 fl02 = runError $ foldLeftM (\acc x -> if x < 100 then pure (x + acc) else throwError "too big") 0 [0 .. 101] 
 t01 = runError $ traverseCps (\x -> if x < 100 then pure x else throwError "too big") [0 .. 99]
 t02 = runError $ traverseCps (\x -> if x < 100 then pure x else throwError "too big") [0 .. 101]
+t01' = runError $ traverseCps1 (\x -> if x < 100 then pure x else throwError "too big") [0 .. 99]
+t02' = runError $ traverseCps1 (\x -> if x < 100 then pure x else throwError "too big") [0 .. 101]
